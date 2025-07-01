@@ -1,0 +1,26 @@
+# Dependencies
+node_modules/
+vendor/
+target/
+build/
+dist/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Language-specific
+*.log
+*.tmp
+*.cache
+.env
+.env.local
+
+# Generated files
+docs/build/
