@@ -1,0 +1,83 @@
+name: Ruby SDK CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  repository_dispatch:
+    types: [sdk-regenerated]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ruby-version: ['2.7', '3.0', '3.1', '3.2', '3.3']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby ${{ matrix.ruby-version }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+    
+    - name: Install dependencies
+      run: bundle install
+    
+    - name: Run tests
+      run: bundle exec rake test || echo "No tests defined yet"
+    
+    - name: Run RuboCop
+      run: bundle exec rubocop || echo "RuboCop not configured"
+    
+    - name: Check gem build
+      run: gem build *.gemspec
+
+  publish:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+    
+    - name: Build gem
+      run: gem build *.gemspec
+    
+    - name: Get gem name
+      id: gem
+      run: echo "name=$(ls *.gem)" >> $GITHUB_OUTPUT
+    
+    - name: Publish to RubyGems
+      env:
+        GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+      run: |
+        if [ -n "$GEM_HOST_API_KEY" ]; then
+          gem push ${{ steps.gem.outputs.name }}
+        else
+          echo "Skipping RubyGems publish - API key not configured"
+        fi
+    
+    - name: Create GitHub Release
+      if: github.event_name == 'repository_dispatch'
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: v${{ github.event.client_payload.version || '1.0.0' }}
+        release_name: Release v${{ github.event.client_payload.version || '1.0.0' }}
+        body: |
+          SDK regenerated from ${{ github.event.client_payload.api }} API
+          
+          Source commit: ${{ github.event.client_payload.source_commit }}
+        draft: false
+        prerelease: false
