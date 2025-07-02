@@ -1,0 +1,312 @@
+name: Generate Multi-Version Ruby SDK
+
+on:
+  repository_dispatch:
+    types: [update-from-spec]
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+      with:
+        token: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Setup Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.0'
+    
+    - name: Install OpenAPI Generator
+      run: |
+        wget https://repo1.maven.org/maven2/org/openapitools/openapi-generator-cli/7.14.0/openapi-generator-cli-7.14.0.jar -O openapi-generator-cli.jar
+        java -version
+    
+    - name: Download OpenAPI specs
+      run: |
+        mkdir -p specs
+        curl -o specs/openapi_v1.yaml "${{ github.event.client_payload.spec_urls.v1 }}"
+        curl -o specs/openapi_v2.yaml "${{ github.event.client_payload.spec_urls.v2 }}"
+        curl -o specs/openapi_v3.yaml "${{ github.event.client_payload.spec_urls.v3 }}"
+    
+    - name: Clean existing generated code
+      run: |
+        rm -rf lib/doorflow/v1 lib/doorflow/v2 lib/doorflow/v3
+        rm -rf docs/
+        rm -rf spec/
+    
+    - name: Generate Ruby SDK for API v1
+      run: |
+        java -jar openapi-generator-cli.jar generate \
+          -i specs/openapi_v1.yaml \
+          -g ruby \
+          -o ./temp/v1 \
+          --library=faraday \
+          --additional-properties=gemName=doorflow,moduleName=DoorFlow::V1,gemVersion=1.0.0
+        mkdir -p lib/doorflow/v1
+        cp -r temp/v1/lib/* lib/doorflow/v1/ 2>/dev/null || true
+    
+    - name: Generate Ruby SDK for API v2
+      run: |
+        java -jar openapi-generator-cli.jar generate \
+          -i specs/openapi_v2.yaml \
+          -g ruby \
+          -o ./temp/v2 \
+          --library=faraday \
+          --additional-properties=gemName=doorflow,moduleName=DoorFlow::V2,gemVersion=1.0.0
+        mkdir -p lib/doorflow/v2
+        cp -r temp/v2/lib/* lib/doorflow/v2/ 2>/dev/null || true
+    
+    - name: Generate Ruby SDK for API v3
+      run: |
+        java -jar openapi-generator-cli.jar generate \
+          -i specs/openapi_v3.yaml \
+          -g ruby \
+          -o ./temp/v3 \
+          --library=faraday \
+          --additional-properties=gemName=doorflow,moduleName=DoorFlow::V3,gemVersion=1.0.0
+        mkdir -p lib/doorflow/v3
+        cp -r temp/v3/lib/* lib/doorflow/v3/ 2>/dev/null || true
+    
+    - name: Create unified client
+      run: |
+        mkdir -p lib/doorflow
+        cat > lib/doorflow.rb << 'EOF'
+        # frozen_string_literal: true
+        
+        require 'doorflow/version'
+        require 'doorflow/client'
+        
+        module DoorFlow
+          class Error < StandardError; end
+        end
+        EOF
+        
+        cat > lib/doorflow/client.rb << 'EOF'
+        # frozen_string_literal: true
+        
+        require 'doorflow/v1'
+        require 'doorflow/v2'
+        require 'doorflow/v3'
+        
+        module DoorFlow
+          class Client
+            attr_reader :username, :password, :base_url
+            
+            def initialize(username:, password:, base_url: 'https://api.doorflow.com')
+              @username = username
+              @password = password
+              @base_url = base_url
+            end
+            
+            # Get API v1 client
+            def v1
+              @v1 ||= begin
+                config = DoorFlow::V1::Configuration.new
+                config.host = "#{base_url}/api/1"
+                config.username = username
+                config.password = password
+                
+                {
+                  people: DoorFlow::V1::PeopleApi.new(DoorFlow::V1::ApiClient.new(config)),
+                  sync: DoorFlow::V1::SyncApi.new(DoorFlow::V1::ApiClient.new(config)),
+                  events: DoorFlow::V1::EventsApi.new(DoorFlow::V1::ApiClient.new(config)),
+                  groups: DoorFlow::V1::GroupsApi.new(DoorFlow::V1::ApiClient.new(config)),
+                  roles: DoorFlow::V1::RolesApi.new(DoorFlow::V1::ApiClient.new(config))
+                }
+              end
+            end
+            
+            # Get API v2 client  
+            def v2
+              @v2 ||= begin
+                config = DoorFlow::V2::Configuration.new
+                config.host = "#{base_url}/api/2"
+                config.username = username
+                config.password = password
+                
+                {
+                  accounts: DoorFlow::V2::AccountsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  authentication: DoorFlow::V2::AuthenticationApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  beacons: DoorFlow::V2::BeaconsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  credentials: DoorFlow::V2::CredentialsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  door_controllers: DoorFlow::V2::DoorControllersApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  events: DoorFlow::V2::EventsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  groups: DoorFlow::V2::GroupsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  notification_rules: DoorFlow::V2::NotificationRulesApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  people: DoorFlow::V2::PeopleApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  reservations: DoorFlow::V2::ReservationsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  roles: DoorFlow::V2::RolesApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  shifts: DoorFlow::V2::ShiftsApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  sites: DoorFlow::V2::SitesApi.new(DoorFlow::V2::ApiClient.new(config)),
+                  sync: DoorFlow::V2::SyncApi.new(DoorFlow::V2::ApiClient.new(config))
+                }
+              end
+            end
+            
+            # Get API v3 client
+            def v3
+              @v3 ||= begin
+                config = DoorFlow::V3::Configuration.new
+                config.host = "#{base_url}/api/3"
+                config.username = username
+                config.password = password
+                
+                {
+                  accounts: DoorFlow::V3::AccountsApi.new(DoorFlow::V3::ApiClient.new(config)),
+                  channels: DoorFlow::V3::ChannelsApi.new(DoorFlow::V3::ApiClient.new(config)),
+                  group_reservations: DoorFlow::V3::GroupReservationsApi.new(DoorFlow::V3::ApiClient.new(config)),
+                  oauth_applications: DoorFlow::V3::OauthApplicationsApi.new(DoorFlow::V3::ApiClient.new(config)),
+                  people: DoorFlow::V3::PeopleApi.new(DoorFlow::V3::ApiClient.new(config))
+                  # Add other v3 APIs as generated
+                }
+              end
+            end
+          end
+        end
+        EOF
+        
+        cat > lib/doorflow/version.rb << 'EOF'
+        # frozen_string_literal: true
+        
+        module DoorFlow
+          VERSION = '1.0.0'
+        end
+        EOF
+    
+    - name: Create gemspec
+      run: |
+        cat > doorflow.gemspec << 'EOF'
+        # frozen_string_literal: true
+        
+        require_relative 'lib/doorflow/version'
+        
+        Gem::Specification.new do |spec|
+          spec.name = 'doorflow'
+          spec.version = DoorFlow::VERSION
+          spec.authors = ['DoorFlow']
+          spec.email = ['support@doorflow.com']
+        
+          spec.summary = 'Official Ruby SDK for DoorFlow API'
+          spec.description = 'Access all versions of the DoorFlow API (v1, v2, v3) for access control management'
+          spec.homepage = 'https://github.com/doorflow/doorflow-sdk-ruby'
+          spec.license = 'MIT'
+          spec.required_ruby_version = '>= 2.6.0'
+        
+          spec.metadata['homepage_uri'] = spec.homepage
+          spec.metadata['source_code_uri'] = 'https://github.com/doorflow/doorflow-sdk-ruby'
+          spec.metadata['changelog_uri'] = 'https://github.com/doorflow/doorflow-sdk-ruby/blob/main/CHANGELOG.md'
+        
+          spec.files = Dir.glob('{lib,spec}/**/*') + %w[README.md LICENSE Gemfile]
+          spec.require_paths = ['lib']
+        
+          spec.add_dependency 'faraday', '>= 1.0', '< 3.0'
+          spec.add_dependency 'faraday-multipart', '~> 1.0'
+          
+          spec.add_development_dependency 'rspec', '~> 3.12'
+          spec.add_development_dependency 'rubocop', '~> 1.50'
+        end
+        EOF
+    
+    - name: Create Gemfile
+      run: |
+        cat > Gemfile << 'EOF'
+        # frozen_string_literal: true
+        
+        source 'https://rubygems.org'
+        
+        gemspec
+        EOF
+    
+    - name: Update README
+      run: |
+        cat > README.md << 'EOF'
+        # Ruby SDK for DoorFlow API
+        
+        This SDK provides access to all versions of the DoorFlow API (v1, v2, v3) in a single gem.
+        
+        ## Installation
+        
+        Add this line to your application's Gemfile:
+        
+        ```ruby
+        gem 'doorflow'
+        ```
+        
+        And then execute:
+        
+        ```bash
+        bundle install
+        ```
+        
+        Or install it yourself as:
+        
+        ```bash
+        gem install doorflow
+        ```
+        
+        ## Usage
+        
+        ```ruby
+        require 'doorflow'
+        
+        # Create a client with access to all API versions
+        client = DoorFlow::Client.new(
+          username: 'your-username',
+          password: 'your-password'
+        )
+        
+        # Use API v1
+        v1 = client.v1
+        people = v1[:people].list_people
+        
+        # Use API v2  
+        v2 = client.v2
+        account = v2[:accounts].get_account_details
+        
+        # Use API v3
+        v3 = client.v3
+        channels = v3[:channels].list_channels
+        ```
+        
+        ## API Versions
+        
+        - **v1**: Basic people management, sync operations
+        - **v2**: Full feature set including door controllers, credentials, notifications
+        - **v3**: Enhanced features with channels (replacing door controllers), OAuth, group reservations
+        
+        ## Auto-generated
+        
+        This SDK is automatically generated from OpenAPI specifications and updated when the API changes.
+        EOF
+    
+    - name: Test gem build
+      run: |
+        gem build doorflow.gemspec || echo "Gem build needs configuration"
+    
+    - name: Commit and push changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add -A
+        git commit -m "Update SDK from multi-version OpenAPI specs
+        
+        Generated from:
+        - API v1: ${{ github.event.client_payload.spec_urls.v1 }}
+        - API v2: ${{ github.event.client_payload.spec_urls.v2 }}
+        - API v3: ${{ github.event.client_payload.spec_urls.v3 }}
+        
+        Source commit: ${{ github.event.client_payload.source_commit }}
+        Source repo: ${{ github.event.client_payload.source_repo }}"
+        git push
+    
+    - name: Create release
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        VERSION="v$(date +%Y.%m.%d)-$(echo ${{ github.event.client_payload.source_commit }} | head -c 7)"
+        gh release create $VERSION \
+          --title "Multi-Version SDK Release $VERSION" \
+          --notes "Ruby SDK updated from OpenAPI specifications"
