@@ -28,23 +28,23 @@ gem install doorflow-api
 ## Usage
 
 ```ruby
-require 'doorflow-api'
+require 'doorflow_api'
 
 # Configure the client
-DoorFlowAPI.configure do |config|
+DoorflowApi.configure do |config|
   config.access_token = 'your_api_token'
   config.host = 'api.doorflow.com'
   config.scheme = 'https'
 end
 
 # Create an API instance
-api = DoorFlowAPI::PeopleApi.new
+api = DoorflowApi::PeopleApi.new
 
 # List people
 begin
   result = api.list_people
   puts result
-rescue DoorFlowAPI::ApiError => e
+rescue DoorflowApi::ApiError => e
   puts "Error: #{e}"
 end
 ```
@@ -54,7 +54,7 @@ end
 DoorFlow API uses Bearer token authentication. You can obtain an API token from your DoorFlow account dashboard.
 
 ```ruby
-DoorFlowAPI.configure do |config|
+DoorflowApi.configure do |config|
   config.access_token = ENV['DOORFLOW_API_TOKEN']
 end
 ```
@@ -78,9 +78,9 @@ For detailed API documentation, visit: https://docs.doorflow.com/api
 ### Create a Person
 
 ```ruby
-api = DoorFlowAPI::PeopleApi.new
+api = DoorflowApi::PeopleApi.new
 
-person = DoorFlowAPI::PersonCreate.new(
+person = DoorflowApi::PersonCreate.new(
   first_name: 'John',
   last_name: 'Doe',
   email: 'john.doe@example.com'
@@ -93,7 +93,7 @@ puts "Created person: #{result.id}"
 ### List Access Events
 
 ```ruby
-api = DoorFlowAPI::EventsApi.new
+api = DoorflowApi::EventsApi.new
 
 events = api.list_events(
   page: 1,
