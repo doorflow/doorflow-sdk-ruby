@@ -5,7 +5,7 @@ gemAuthor: NetNodes Ltd
 gemAuthorEmail: support@netnodes.net
 gemHomepage: https://www.doorflow.com
 gemLicense: MIT
-gemRequiredRubyVersion: '>= 3.0'
+gemRequiredRubyVersion: '>= 3.2'
 gemDescription: Ruby SDK for the DoorFlow Access Control API
 gemSummary: Official Ruby client for DoorFlow API v3
 
