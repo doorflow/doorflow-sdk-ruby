@@ -1,0 +1,16 @@
+moduleName: DoorFlowAPI
+gemName: doorflow-api
+gemVersion: 1.0.0
+gemAuthor: NetNodes Ltd
+gemAuthorEmail: support@netnodes.net
+gemHomepage: https://www.doorflow.com
+gemLicense: MIT
+gemRequiredRubyVersion: '>= 3.0'
+gemDescription: Ruby SDK for the DoorFlow Access Control API
+gemSummary: Official Ruby client for DoorFlow API v3
+
+# HTTP client library
+library: faraday
+
+# Additional metadata
+hideGenerationTimestamp: true
