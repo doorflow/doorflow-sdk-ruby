@@ -1,9 +1,9 @@
 require 'spec_helper'
 
-RSpec.describe DoorflowApi::Configuration do
+RSpec.describe DoorFlowApi::Configuration do
   describe '#initialize' do
     it 'has default values' do
-      config = DoorflowApi::Configuration.new
+      config = DoorFlowApi::Configuration.new
       expect(config.host).to eq('api.doorflow.com')
       expect(config.scheme).to eq('https')
     end
@@ -11,13 +11,13 @@ RSpec.describe DoorflowApi::Configuration do
 
   describe '#configure' do
     it 'allows configuration' do
-      DoorflowApi.configure do |config|
+      DoorFlowApi.configure do |config|
         config.access_token = 'test_token'
         config.host = 'test.doorflow.com'
       end
 
-      expect(DoorflowApi.configuration.access_token).to eq('test_token')
-      expect(DoorflowApi.configuration.host).to eq('test.doorflow.com')
+      expect(DoorFlowApi.configuration.access_token).to eq('test_token')
+      expect(DoorFlowApi.configuration.host).to eq('test.doorflow.com')
     end
   end
 end
