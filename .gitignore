@@ -1,26 +1,39 @@
-# Dependencies
-node_modules/
-vendor/
-target/
-build/
-dist/
+# Generated files
+*.gem
+*.rbc
+/.config
+/coverage/
+/InstalledFiles
+/pkg/
+/spec/reports/
+/spec/examples.txt
+/test/tmp/
+/test/version_tmp/
+/tmp/
 
-# IDE
+# RSpec
+.rspec_status
+
+# Bundler
+.bundle
+vendor/bundle
+Gemfile.lock
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
 .vscode/
 .idea/
 *.swp
 *.swo
+*~
 
-# OS
-.DS_Store
-Thumbs.db
+# OpenAPI Generator
+.openapi-generator/
+openapi.yaml
 
-# Language-specific
-*.log
-*.tmp
-*.cache
+# Environment
 .env
 .env.local
-
-# Generated files
-docs/build/

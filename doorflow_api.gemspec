@@ -17,7 +17,7 @@ require "doorflow_api/version"
 
 Gem::Specification.new do |s|
   s.name        = "doorflow_api"
-  s.version     = DoorflowApi::VERSION
+  s.version     = DoorFlowApi::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["OpenAPI-Generator"]
   s.email       = ["support@doorflow.com"]
@@ -25,7 +25,7 @@ Gem::Specification.new do |s|
   s.summary     = "DoorFlow Public API Ruby Gem"
   s.description = "This is the DoorFlow Public API."
   s.license     = "Unlicense"
-  s.required_ruby_version = ">= 2.7"
+  s.required_ruby_version = ">= 3.2"
   s.metadata    = {}
 
   s.add_runtime_dependency 'typhoeus', '~> 1.0', '>= 1.0.1'

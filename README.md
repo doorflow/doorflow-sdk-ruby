@@ -1,15 +1,28 @@
-# doorflow API SDK for ruby
+# DoorFlow Ruby SDK
 
-Official ruby SDK for the doorflow API.
+Official Ruby client for the DoorFlow Access Control API.
+
+[![Gem Version](https://badge.fury.io/rb/doorflow-api.svg)](https://badge.fury.io/rb/doorflow-api)
+[![Build Status](https://github.com/doorflow/doorflow-sdk-ruby/workflows/Generate%20SDK/badge.svg)](https://github.com/doorflow/doorflow-sdk-ruby/actions)
 
 ## Installation
 
-```ruby
-# Add to your Gemfile
-gem 'doorflow_api'
+Add this line to your application's Gemfile:
 
-# Or install directly
-gem install doorflow_api
+```ruby
+gem 'doorflow-api'
+```
+
+And then execute:
+
+```bash
+bundle install
+```
+
+Or install it yourself as:
+
+```bash
+gem install doorflow-api
 ```
 
 ## Usage
@@ -17,22 +30,120 @@ gem install doorflow_api
 ```ruby
 require 'doorflow_api'
 
-client = DoorFlowApi::Client.new(
-  client_id: 'your_client_id',
-  client_secret: 'your_client_secret'
-)
+# Configure the client
+DoorFlow.configure do |config|
+  config.access_token = 'your_api_token'
+  config.host = 'api.doorflow.com'
+  config.scheme = 'https'
+end
+
+# Create an API instance
+api = DoorFlow::PeopleApi.new
+
+# List people
+begin
+  result = api.list_people
+  puts result
+rescue DoorFlow::ApiError => e
+  puts "Error: #{e}"
+end
 ```
 
-## Documentation
+## Authentication
 
-- [doorflow API Documentation](https://docs.doorflow.com/doorflow)
-- [SDK Reference](./docs)
+DoorFlow API uses Bearer token authentication. You can obtain an API token from your DoorFlow account dashboard.
 
-## Support
+```ruby
+DoorFlow.configure do |config|
+  config.access_token = ENV['DOORFLOW_API_TOKEN']
+end
+```
 
-- [API Support](mailto:support@doorflow.com)
-- [GitHub Issues](https://github.com/netnodes/doorflow-sdk-ruby/issues)
+## API Documentation
+
+For detailed API documentation, visit: https://docs.doorflow.com/api
+
+## Available APIs
+
+- `PeopleApi` - Manage people and their access
+- `CredentialsApi` - Manage credentials
+- `GroupsApi` - Manage groups
+- `RolesApi` - Manage roles
+- `SitesApi` - Manage sites
+- `EventsApi` - Query access events
+- And more...
+
+## Examples
+
+### Create a Person
+
+```ruby
+api = DoorFlow::PeopleApi.new
+
+person = DoorFlow::Person.new(
+  first_name: 'John',
+  last_name: 'Doe',
+  email: 'john.doe@example.com'
+)
+
+result = api.create_person(person)
+puts "Created person: #{result.id}"
+```
+
+### List Access Events
+
+```ruby
+api = DoorFlow::EventsApi.new
+
+events = api.list_events(
+  page: 1,
+  per_page: 50,
+  start_date: '2024-01-01',
+  end_date: '2024-12-31'
+)
+
+events.each do |event|
+  puts "#{event.timestamp}: #{event.person_name} at #{event.door_name}"
+end
+```
+
+## Development
+
+This SDK is automatically generated from the DoorFlow OpenAPI specification.
+
+To regenerate the SDK:
+
+```bash
+# Trigger via GitHub Actions
+gh workflow run generate-sdk.yml
+
+# Or manually with Docker
+docker run --rm \
+  -v ${PWD}:/local \
+  openapitools/openapi-generator-cli generate \
+  -i /local/openapi.yaml \
+  -g ruby \
+  -o /local \
+  -c /local/.openapi-generator-config.yaml
+```
+
+## Testing
+
+```bash
+bundle install
+bundle exec rspec
+```
+
+## Contributing
+
+This is an auto-generated SDK. Please report issues or request features in the main [DoorFlow repository](https://github.com/netnodes/doorguard/issues).
 
 ## License
 
-MIT License - see [LICENSE](LICENSE) file for details.
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Support
+
+- Documentation: https://docs.doorflow.com
+- Support: support@netnodes.net
+- Website: https://www.doorflow.com
