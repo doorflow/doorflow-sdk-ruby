@@ -33,6 +33,8 @@ module DoorFlow
     end
 
     # Convert generated API model to Resource
+    # @param model [Object, nil] an API model object from the generated client
+    # @return [Resource, nil] a resource instance, or nil if model is nil
     def self.from_api_model(model)
       return nil if model.nil?
 
@@ -48,21 +50,29 @@ module DoorFlow
     end
 
     # Convert array of API models to Resources
+    # @param models [Array] array of API model objects
+    # @return [Array<Resource>] array of resource instances
     def self.from_api_models(models)
       return [] if models.nil? || models.empty?
       models.map { |model| from_api_model(model) }
     end
 
+    # String representation of the resource
+    # @return [String] a string showing the class name and ID
     def to_s
       "#<#{self.class.name} id=#{id}>"
     end
 
+    # Detailed string representation for debugging
+    # @return [String] a string showing class, object ID, and resource ID
     def inspect
       "#<#{self.class.name}:0x#{object_id.to_s(16)} id=#{id}>"
     end
 
     protected
 
+    # Get or create the API client for this resource class
+    # @return [DoorFlow::Client] the API client instance
     def self.client
       @client ||= DoorFlow::Client.new
     end
