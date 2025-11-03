@@ -2,7 +2,6 @@
 require 'doorflow-api'
 
 # Core extensions
-require 'doorflow/configuration'
 require 'doorflow/client'
 require 'doorflow/resource'
 require 'doorflow/list_object'
