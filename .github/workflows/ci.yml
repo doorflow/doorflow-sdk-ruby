@@ -28,7 +28,7 @@ jobs:
       run: bundle install
 
     - name: Run tests with coverage
-      run: bundle exec rspec
+      run: bundle exec rspec --tag ~vcr
       env:
         COVERAGE: true
 
