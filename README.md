@@ -134,47 +134,47 @@ All URIs are relative to *https://api.doorflow.com*
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
 *DoorFlow::AccountsApi* | [**get_account**](docs/AccountsApi.md#get_account) | **GET** /api/3/account | Get current account details
-*DoorFlow::AdmissionRequestsApi* | [**get_admission_request**](docs/AdmissionRequestsApi.md#get_admission_request) | **GET** /api/3/admission_requests/{id} | Get admission request status
-*DoorFlow::ChannelsApi* | [**admit_channel**](docs/ChannelsApi.md#admit_channel) | **POST** /api/3/channels/{id}/admit | Admit through channel (any person)
-*DoorFlow::ChannelsApi* | [**admit_person**](docs/ChannelsApi.md#admit_person) | **POST** /api/3/channels/{id}/admit_person | Admit specific person through channel
-*DoorFlow::ChannelsApi* | [**auto_unlock_channel**](docs/ChannelsApi.md#auto_unlock_channel) | **POST** /api/3/channels/{id}/auto_unlock | Set auto-unlock shift
-*DoorFlow::ChannelsApi* | [**get_channel**](docs/ChannelsApi.md#get_channel) | **GET** /api/3/channels/{id} | Get channel details
+*DoorFlow::AdmissionRequestsApi* | [**get_admission_request**](docs/AdmissionRequestsApi.md#get_admission_request) | **GET** /api/3/admission_requests/`{id}` | Get admission request status
+*DoorFlow::ChannelsApi* | [**admit_channel**](docs/ChannelsApi.md#admit_channel) | **POST** /api/3/channels/`{id}`/admit | Admit through channel (any person)
+*DoorFlow::ChannelsApi* | [**admit_person**](docs/ChannelsApi.md#admit_person) | **POST** /api/3/channels/`{id}`/admit_person | Admit specific person through channel
+*DoorFlow::ChannelsApi* | [**auto_unlock_channel**](docs/ChannelsApi.md#auto_unlock_channel) | **POST** /api/3/channels/`{id}`/auto_unlock | Set auto-unlock shift
+*DoorFlow::ChannelsApi* | [**get_channel**](docs/ChannelsApi.md#get_channel) | **GET** /api/3/channels/`{id}` | Get channel details
 *DoorFlow::ChannelsApi* | [**list_channels**](docs/ChannelsApi.md#list_channels) | **GET** /api/3/channels | List channels (door controllers)
-*DoorFlow::ChannelsApi* | [**lockdown_channel**](docs/ChannelsApi.md#lockdown_channel) | **POST** /api/3/channels/{id}/lockdown | Enable lockdown mode
-*DoorFlow::ChannelsApi* | [**normal_channel**](docs/ChannelsApi.md#normal_channel) | **POST** /api/3/channels/{id}/normal | Return channel to normal mode
-*DoorFlow::ChannelsApi* | [**regenerate_encryption_key**](docs/ChannelsApi.md#regenerate_encryption_key) | **POST** /api/3/channels/{id}/regenerate_encryption_key | Regenerate encryption key
-*DoorFlow::ChannelsApi* | [**remove_encryption_key**](docs/ChannelsApi.md#remove_encryption_key) | **POST** /api/3/channels/{id}/remove_encryption_key | Remove encryption key
-*DoorFlow::ChannelsApi* | [**unlock_channel**](docs/ChannelsApi.md#unlock_channel) | **POST** /api/3/channels/{id}/unlock | Unlock channel (unlock mode)
-*DoorFlow::ChannelsApi* | [**unlockdown_channel**](docs/ChannelsApi.md#unlockdown_channel) | **POST** /api/3/channels/{id}/unlockdown | Disable lockdown mode
+*DoorFlow::ChannelsApi* | [**lockdown_channel**](docs/ChannelsApi.md#lockdown_channel) | **POST** /api/3/channels/`{id}`/lockdown | Enable lockdown mode
+*DoorFlow::ChannelsApi* | [**normal_channel**](docs/ChannelsApi.md#normal_channel) | **POST** /api/3/channels/`{id}`/normal | Return channel to normal mode
+*DoorFlow::ChannelsApi* | [**regenerate_encryption_key**](docs/ChannelsApi.md#regenerate_encryption_key) | **POST** /api/3/channels/`{id}`/regenerate_encryption_key | Regenerate encryption key
+*DoorFlow::ChannelsApi* | [**remove_encryption_key**](docs/ChannelsApi.md#remove_encryption_key) | **POST** /api/3/channels/`{id}`/remove_encryption_key | Remove encryption key
+*DoorFlow::ChannelsApi* | [**unlock_channel**](docs/ChannelsApi.md#unlock_channel) | **POST** /api/3/channels/`{id}`/unlock | Unlock channel (unlock mode)
+*DoorFlow::ChannelsApi* | [**unlockdown_channel**](docs/ChannelsApi.md#unlockdown_channel) | **POST** /api/3/channels/`{id}`/unlockdown | Disable lockdown mode
 *DoorFlow::CredentialTypesApi* | [**list_credential_types**](docs/CredentialTypesApi.md#list_credential_types) | **GET** /api/3/credential_types | List credential types
-*DoorFlow::CredentialsApi* | [**create_credential**](docs/CredentialsApi.md#create_credential) | **POST** /api/3/people/{person_id}/credentials | Create credential
-*DoorFlow::CredentialsApi* | [**delete_credential**](docs/CredentialsApi.md#delete_credential) | **DELETE** /api/3/people/{person_id}/credentials/{id} | Delete credential
-*DoorFlow::CredentialsApi* | [**get_credential**](docs/CredentialsApi.md#get_credential) | **GET** /api/3/people/{person_id}/credentials/{id} | Get credential details
+*DoorFlow::CredentialsApi* | [**create_credential**](docs/CredentialsApi.md#create_credential) | **POST** /api/3/people/`{person_id}`/credentials | Create credential
+*DoorFlow::CredentialsApi* | [**delete_credential**](docs/CredentialsApi.md#delete_credential) | **DELETE** /api/3/people/`{person_id}`/credentials/`{id}` | Delete credential
+*DoorFlow::CredentialsApi* | [**get_credential**](docs/CredentialsApi.md#get_credential) | **GET** /api/3/people/`{person_id}`/credentials/`{id}` | Get credential details
 *DoorFlow::CredentialsApi* | [**list_all_credentials**](docs/CredentialsApi.md#list_all_credentials) | **GET** /api/3/credentials | List all credentials
-*DoorFlow::CredentialsApi* | [**list_person_credentials**](docs/CredentialsApi.md#list_person_credentials) | **GET** /api/3/people/{person_id}/credentials | List person credentials
-*DoorFlow::CredentialsApi* | [**update_credential**](docs/CredentialsApi.md#update_credential) | **PUT** /api/3/people/{person_id}/credentials/{id} | Update credential
-*DoorFlow::EventsApi* | [**get_event**](docs/EventsApi.md#get_event) | **GET** /api/3/events/{id} | Get event details
+*DoorFlow::CredentialsApi* | [**list_person_credentials**](docs/CredentialsApi.md#list_person_credentials) | **GET** /api/3/people/`{person_id}`/credentials | List person credentials
+*DoorFlow::CredentialsApi* | [**update_credential**](docs/CredentialsApi.md#update_credential) | **PUT** /api/3/people/`{person_id}`/credentials/`{id}` | Update credential
+*DoorFlow::EventsApi* | [**get_event**](docs/EventsApi.md#get_event) | **GET** /api/3/events/`{id}` | Get event details
 *DoorFlow::EventsApi* | [**list_events**](docs/EventsApi.md#list_events) | **GET** /api/3/events | List events
 *DoorFlow::GroupReservationsApi* | [**create_group_reservation**](docs/GroupReservationsApi.md#create_group_reservation) | **POST** /api/3/group_reservations | Create group reservation
-*DoorFlow::GroupReservationsApi* | [**delete_group_reservation**](docs/GroupReservationsApi.md#delete_group_reservation) | **DELETE** /api/3/group_reservations/{id} | Delete group reservation
+*DoorFlow::GroupReservationsApi* | [**delete_group_reservation**](docs/GroupReservationsApi.md#delete_group_reservation) | **DELETE** /api/3/group_reservations/`{id}` | Delete group reservation
 *DoorFlow::GroupReservationsApi* | [**list_group_reservations**](docs/GroupReservationsApi.md#list_group_reservations) | **GET** /api/3/group_reservations | List group reservations
 *DoorFlow::GroupsApi* | [**list_groups**](docs/GroupsApi.md#list_groups) | **GET** /api/3/groups | List groups
 *DoorFlow::NotificationRulesApi* | [**create_notification_rule**](docs/NotificationRulesApi.md#create_notification_rule) | **POST** /api/3/notification_rules | Create notification rule
-*DoorFlow::NotificationRulesApi* | [**delete_notification_rule**](docs/NotificationRulesApi.md#delete_notification_rule) | **DELETE** /api/3/notification_rules/{id} | Delete notification rule
-*DoorFlow::NotificationRulesApi* | [**get_notification_rule**](docs/NotificationRulesApi.md#get_notification_rule) | **GET** /api/3/notification_rules/{id} | Get notification rule details
+*DoorFlow::NotificationRulesApi* | [**delete_notification_rule**](docs/NotificationRulesApi.md#delete_notification_rule) | **DELETE** /api/3/notification_rules/`{id}` | Delete notification rule
+*DoorFlow::NotificationRulesApi* | [**get_notification_rule**](docs/NotificationRulesApi.md#get_notification_rule) | **GET** /api/3/notification_rules/`{id}` | Get notification rule details
 *DoorFlow::NotificationRulesApi* | [**list_notification_rules**](docs/NotificationRulesApi.md#list_notification_rules) | **GET** /api/3/notification_rules | List notification rules
-*DoorFlow::NotificationRulesApi* | [**update_notification_rule**](docs/NotificationRulesApi.md#update_notification_rule) | **PUT** /api/3/notification_rules/{id} | Update notification rule
+*DoorFlow::NotificationRulesApi* | [**update_notification_rule**](docs/NotificationRulesApi.md#update_notification_rule) | **PUT** /api/3/notification_rules/`{id}` | Update notification rule
 *DoorFlow::OauthApi* | [**authorize_o_auth**](docs/OauthApi.md#authorize_o_auth) | **GET** /oauth/authorize | Authorization endpoint
 *DoorFlow::OauthApi* | [**get_access_token**](docs/OauthApi.md#get_access_token) | **POST** /oauth/token | Obtain access token
 *DoorFlow::OauthApi* | [**get_token_info**](docs/OauthApi.md#get_token_info) | **GET** /oauth/token/info | Get token information
 *DoorFlow::OauthApi* | [**revoke_token**](docs/OauthApi.md#revoke_token) | **POST** /oauth/revoke | Revoke access token or refresh token
 *DoorFlow::PeopleApi* | [**create_person**](docs/PeopleApi.md#create_person) | **POST** /api/3/people | Create person
-*DoorFlow::PeopleApi* | [**delete_person**](docs/PeopleApi.md#delete_person) | **DELETE** /api/3/people/{id} | Delete person
-*DoorFlow::PeopleApi* | [**get_person**](docs/PeopleApi.md#get_person) | **GET** /api/3/people/{id} | Get person details
+*DoorFlow::PeopleApi* | [**delete_person**](docs/PeopleApi.md#delete_person) | **DELETE** /api/3/people/`{id}` | Delete person
+*DoorFlow::PeopleApi* | [**get_person**](docs/PeopleApi.md#get_person) | **GET** /api/3/people/`{id}` | Get person details
 *DoorFlow::PeopleApi* | [**list_people**](docs/PeopleApi.md#list_people) | **GET** /api/3/people | List people
-*DoorFlow::PeopleApi* | [**update_person**](docs/PeopleApi.md#update_person) | **PUT** /api/3/people/{id} | Update person
+*DoorFlow::PeopleApi* | [**update_person**](docs/PeopleApi.md#update_person) | **PUT** /api/3/people/`{id}` | Update person
 *DoorFlow::ReservationsApi* | [**create_reservation**](docs/ReservationsApi.md#create_reservation) | **POST** /api/3/reservations | Create reservation
-*DoorFlow::ReservationsApi* | [**delete_reservation**](docs/ReservationsApi.md#delete_reservation) | **DELETE** /api/3/reservations/{id} | Delete reservation
+*DoorFlow::ReservationsApi* | [**delete_reservation**](docs/ReservationsApi.md#delete_reservation) | **DELETE** /api/3/reservations/`{id}` | Delete reservation
 *DoorFlow::ReservationsApi* | [**list_reservations**](docs/ReservationsApi.md#list_reservations) | **GET** /api/3/reservations | List reservations
 *DoorFlow::RolesApi* | [**list_roles**](docs/RolesApi.md#list_roles) | **GET** /api/3/roles | List roles
 *DoorFlow::SitesApi* | [**list_sites**](docs/SitesApi.md#list_sites) | **GET** /api/3/sites | List sites
