@@ -26,58 +26,58 @@ jobs:
     
     - name: Install dependencies
       run: bundle install
-    
-    - name: Run tests
-      run: bundle exec rake test || echo "No tests defined yet"
-    
-    - name: Run RuboCop
-      run: bundle exec rubocop || echo "RuboCop not configured"
-    
-    - name: Check gem build
-      run: gem build *.gemspec
 
-  publish:
+    - name: Run tests with coverage
+      run: bundle exec rspec
+      env:
+        COVERAGE: true
+
+    - name: Upload coverage to Codecov
+      if: matrix.ruby-version == '3.4'
+      uses: codecov/codecov-action@v3
+      with:
+        files: ./coverage/coverage.xml
+        flags: unittests
+        name: codecov-umbrella
+
+    - name: Run StandardRB
+      run: bundle exec standardrb || echo "StandardRB not configured"
+      continue-on-error: true
+
+    - name: Security audit
+      run: |
+        gem install bundler-audit
+        bundle audit check --update
+      continue-on-error: true
+
+    - name: Check gem build
+      run: gem build doorflow-api.gemspec
+
+  auto-publish:
     needs: test
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' || github.event_name == 'repository_dispatch'
-    
+    if: github.event_name == 'repository_dispatch'
+    permissions:
+      contents: write
+
     steps:
     - uses: actions/checkout@v4
-    
+
     - name: Set up Ruby
       uses: ruby/setup-ruby@v1
       with:
         ruby-version: '3.4'
         bundler-cache: true
-    
-    - name: Build gem
-      run: gem build *.gemspec
-    
-    - name: Get gem name
-      id: gem
-      run: echo "name=$(ls *.gem)" >> $GITHUB_OUTPUT
-    
-    - name: Publish to RubyGems
-      env:
-        GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+
+    - name: Update version
+      if: github.event.client_payload.version
       run: |
-        if [ -n "$GEM_HOST_API_KEY" ]; then
-          gem push ${{ steps.gem.outputs.name }}
-        else
-          echo "Skipping RubyGems publish - API key not configured"
-        fi
-    
-    - name: Create GitHub Release
-      if: github.event_name == 'repository_dispatch'
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        tag_name: v${{ github.event.client_payload.version || '1.0.0' }}
-        release_name: Release v${{ github.event.client_payload.version || '1.0.0' }}
-        body: |
-          SDK regenerated from ${{ github.event.client_payload.api }} API
-          
-          Source commit: ${{ github.event.client_payload.source_commit }}
-        draft: false
-        prerelease: false
+        version=${{ github.event.client_payload.version }}
+        sed -i "s/VERSION = '[^']*'/VERSION = '$version'/" lib/doorflow-api/version.rb
+        git config user.name "github-actions[bot]"
+        git config user.email "github-actions[bot]@users.noreply.github.com"
+        git add lib/doorflow-api/version.rb
+        git commit -m "Bump version to $version"
+        git tag "v$version"
+        git push origin main
+        git push origin "v$version"

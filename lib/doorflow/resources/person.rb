@@ -1,8 +1,32 @@
 module DoorFlow
+  # Person resource for managing people in DoorFlow
+  #
+  # People represent individuals who can access doors through the DoorFlow system.
+  # They can be assigned credentials, added to groups, and granted access through roles.
+  #
+  # @example Creating a person
+  #   person = DoorFlow::Person.create(
+  #     first_name: 'John',
+  #     last_name: 'Doe',
+  #     email: 'john@example.com'
+  #   )
+  #
+  # @example Retrieving a person
+  #   person = DoorFlow::Person.retrieve('person_123')
+  #
+  # @example Listing people with auto-pagination
+  #   DoorFlow::Person.list.auto_paging_each do |person|
+  #     puts person.attributes['email']
+  #   end
   class Person < Resource
     # Create a new person
     # @param params [Hash] Person attributes
+    # @option params [String] :first_name First name (required)
+    # @option params [String] :last_name Last name (required)
+    # @option params [String] :email Email address
+    # @option params [String] :phone Phone number
     # @return [DoorFlow::Person]
+    # @raise [DoorFlow::ApiError] if the API request fails
     def self.create(params = {})
       response = client.people_api.create_person(params)
       from_api_model(response)

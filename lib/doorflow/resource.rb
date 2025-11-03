@@ -1,7 +1,26 @@
 module DoorFlow
+  # Base class for all DoorFlow resources
+  #
+  # This class provides common functionality for all resource types,
+  # including conversion from API models and attribute access.
+  #
+  # @abstract Subclass and override methods to create resource classes
+  # @example Creating a resource subclass
+  #   class Person < Resource
+  #     def self.create(params = {})
+  #       response = client.people_api.create_person(params)
+  #       from_api_model(response)
+  #     end
+  #   end
   class Resource
-    attr_reader :id, :attributes
+    # @return [String] the unique identifier for this resource
+    attr_reader :id
 
+    # @return [Hash] the attributes hash for this resource
+    attr_reader :attributes
+
+    # Create a new resource instance
+    # @param attributes [Hash] the attributes for this resource
     def initialize(attributes = {})
       @attributes = attributes
       @id = attributes['id'] || attributes[:id]

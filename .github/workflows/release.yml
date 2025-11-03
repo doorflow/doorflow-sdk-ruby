@@ -1,0 +1,75 @@
+name: Release Gem
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.4'
+          bundler-cache: true
+
+      - name: Install dependencies
+        run: bundle install
+
+      - name: Run tests
+        run: bundle exec rspec
+
+      - name: Build gem
+        run: gem build doorflow-api.gemspec
+
+      - name: Get version from tag
+        id: version
+        run: echo "version=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Verify version matches
+        run: |
+          gem_version=$(ruby -r ./lib/doorflow-api/version.rb -e "puts DoorFlow::VERSION")
+          if [ "$gem_version" != "${{ steps.version.outputs.version }}" ]; then
+            echo "Version mismatch: tag=${{ steps.version.outputs.version }}, gem=$gem_version"
+            exit 1
+          fi
+
+      - name: Push to RubyGems
+        env:
+          GEM_HOST_API_KEY: ${{ secrets.RUBYGEMS_API_KEY }}
+        run: |
+          mkdir -p ~/.gem
+          cat << EOF > ~/.gem/credentials
+          ---
+          :rubygems_api_key: ${GEM_HOST_API_KEY}
+          EOF
+          chmod 0600 ~/.gem/credentials
+          gem push doorflow-api-*.gem
+          rm ~/.gem/credentials
+
+      - name: Extract changelog
+        id: changelog
+        run: |
+          version=${{ steps.version.outputs.version }}
+          changelog=$(sed -n "/## \[$version\]/,/## \[/p" CHANGELOG.md | sed '$d' | tail -n +2)
+          echo "notes<<EOF" >> $GITHUB_OUTPUT
+          echo "$changelog" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          name: Version ${{ steps.version.outputs.version }}
+          body: ${{ steps.changelog.outputs.notes }}
+          files: doorflow-api-*.gem
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

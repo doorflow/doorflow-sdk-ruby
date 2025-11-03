@@ -1,0 +1,3759 @@
+---
+openapi: 3.0.0
+info:
+  title: DoorFlow API
+  version: '3.0'
+  description: Access control and door management API for DoorFlow
+  contact:
+    name: DoorFlow Support
+    url: https://doorflow.com
+servers:
+- url: https://api.doorflow.com
+  description: Production server
+paths:
+  "/api/3/account":
+    get:
+      summary: Get current account details
+      description: Returns the account information for the authenticated user
+      operationId: getAccount
+      tags:
+      - accounts
+      security:
+      - OAuth2: []
+      responses:
+        '200':
+          description: Account details retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Account"
+        '401':
+          description: Unauthorized - Invalid or missing authentication
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+        '403':
+          description: Forbidden - User does not have permission
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Error"
+  "/api/3/admission_requests/{id}":
+    get:
+      summary: Get admission request status
+      description: |
+        Returns the status of an admission request created via POST /api/3/channels/:id/admit or
+        POST /api/3/channels/:id/admit_person. Use this to track whether the admission was successful,
+        denied, or is still pending a response from the door controller.
+      operationId: getAdmissionRequest
+      tags:
+      - admission_requests
+      security:
+      - OAuth2:
+        - account.channel.admit
+        - account.channel.admit.person
+      parameters:
+      - name: id
+        in: path
+        description: Admission request ID (Event ID returned from admit/admit_person
+          endpoints)
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Admission request status retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/AdmissionRequest"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels":
+    get:
+      summary: List channels (door controllers)
+      description: Returns a paginated list of channels (door controllers) accessible
+        to the authenticated user
+      operationId: listChannels
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.readonly
+      parameters:
+      - name: site_id
+        in: query
+        description: Filter channels by site ID
+        required: false
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+          maximum: 1000
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of channels retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+  "/api/3/channels/{id}":
+    get:
+      summary: Get channel details
+      description: Returns details for a specific channel (door controller)
+      operationId: getChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Channel details retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+  "/api/3/channels/{id}/admit":
+    post:
+      summary: Admit through channel (any person)
+      description: |
+        Requests immediate admission through a channel without specifying a person.
+        This creates an admission request that momentarily unlocks the door.
+        Returns an admission_request_id that can be used to track the status via GET /api/3/admission_requests/:id.
+        Only works when the channel is in normal mode (not in unlock mode).
+      operationId: admitChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '202':
+          description: Admission request accepted and queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admission_request_id:
+                    type: integer
+                    description: ID of the admission request (Event ID) for status
+                      tracking
+                    example: 123456789
+                  status:
+                    type: string
+                    enum:
+                    - pending
+                    - admitted
+                    - denied
+                    - offline
+                    description: Initial status of the admission request
+                    example: pending
+        '400':
+          description: Bad Request - Channel not in normal mode or request cannot
+            be processed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/admit_person":
+    post:
+      summary: Admit specific person through channel
+      description: |
+        Requests admission for a specific person through a channel.
+        This checks if the person has valid credentials and access rights before admitting.
+        Returns an admission_request_id for tracking via GET /api/3/admission_requests/:id.
+      operationId: admitPerson
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit.person
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - person_id
+              properties:
+                person_id:
+                  type: integer
+                  description: ID of the person to admit
+                  example: 12345
+      responses:
+        '202':
+          description: Admission request accepted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  admission_request_id:
+                    type: integer
+                    description: ID of the admission request for status tracking
+                    example: 123456789
+                  status:
+                    type: string
+                    enum:
+                    - pending
+                    - admitted
+                    - denied
+                    - offline
+                    description: Initial status of the admission
+                    example: pending
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          description: Forbidden - Person does not have access or is not authorized
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Access denied
+                  reason:
+                    type: string
+                    description: Reason for denial
+                    example: Person does not have valid credentials for this channel
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/lockdown":
+    post:
+      summary: Enable lockdown mode
+      description: |
+        Puts a channel into lockdown mode, restricting various types of access.
+        You can selectively lock down card access, REX (Request to Exit), and AUX inputs.
+      operationId: lockdownChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                card_lockdown:
+                  type: boolean
+                  description: Lock down card access
+                  example: true
+                rex_lockdown:
+                  type: boolean
+                  description: Lock down REX (Request to Exit)
+                  example: false
+                aux_lockdown:
+                  type: boolean
+                  description: Lock down AUX inputs
+                  example: false
+      responses:
+        '200':
+          description: Lockdown mode enabled successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '400':
+          description: Bad Request - Lockdown command failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/unlockdown":
+    post:
+      summary: Disable lockdown mode
+      description: Removes lockdown mode from a channel, restoring normal access control
+      operationId: unlockdownChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Lockdown mode disabled successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '400':
+          description: Bad Request - Unlockdown command failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/unlock":
+    post:
+      summary: Unlock channel (unlock mode)
+      description: |
+        Puts a channel into unlock mode, where the door remains unlocked until a specified time.
+        If no relock_at time is provided, the door remains unlocked until normal mode is restored.
+      operationId: unlockChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                relock_at:
+                  type: string
+                  format: date-time
+                  description: Time when door should automatically relock (optional)
+                  example: '2024-01-15T17:00:00Z'
+      responses:
+        '200':
+          description: Channel unlocked successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/normal":
+    post:
+      summary: Return channel to normal mode
+      description: Cancels unlock mode and returns the channel to normal access control
+        mode
+      operationId: normalChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Channel returned to normal mode successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '400':
+          description: Bad Request - Command failed
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/auto_unlock":
+    post:
+      summary: Set auto-unlock shift
+      description: |
+        Configures a shift during which the channel automatically unlocks.
+        Provide a shift_id to enable auto-unlock, or omit it to disable.
+      operationId: autoUnlockChannel
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                shift_id:
+                  type: integer
+                  nullable: true
+                  description: ID of shift for auto-unlock (null or omit to disable)
+                  example: 10
+      responses:
+        '200':
+          description: Auto-unlock configuration updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '400':
+          description: Bad Request - Invalid shift_id
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: false
+                  message:
+                    type: string
+                    example: No shift found for shift_id - 999
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/regenerate_encryption_key":
+    post:
+      summary: Regenerate encryption key
+      description: Generates a new encryption key for secure communication with the
+        channel
+      operationId: regenerateEncryptionKey
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Encryption key regenerated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/channels/{id}/remove_encryption_key":
+    post:
+      summary: Remove encryption key
+      description: Removes the encryption key, disabling encrypted communication with
+        the channel
+      operationId: removeEncryptionKey
+      tags:
+      - channels
+      security:
+      - OAuth2:
+        - account.channel.admit
+      parameters:
+      - name: id
+        in: path
+        description: Channel ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Encryption key removed successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Channel"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/credential_types":
+    get:
+      summary: List credential types
+      description: |
+        Returns a paginated list of credential types configured for the authenticated user's account.
+        Credential types define the formats and types of credentials (cards, PINs, mobile access, etc.) that can be used.
+        Each credential type is based on a global credential type and can be customized per account.
+      operationId: listCredentialTypes
+      tags:
+      - credential_types
+      security:
+      - OAuth2:
+        - account.credential_type.readonly
+      parameters:
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of credential types retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CredentialType"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/people/{person_id}/credentials":
+    get:
+      summary: List person credentials
+      description: Returns a paginated list of credentials for a specific person,
+        or all credentials if no person_id is provided
+      operationId: listPersonCredentials
+      tags:
+      - credentials
+      security:
+      - OAuth2:
+        - account.person.readonly
+      parameters:
+      - name: person_id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of credentials retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Credential"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create credential
+      description: Creates a new credential for a person. For HID Mobile Access and
+        PassFlow credentials, this initiates an invitation process.
+      operationId: createCredential
+      tags:
+      - credentials
+      security:
+      - OAuth2:
+        - account.person
+      parameters:
+      - name: person_id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CredentialInput"
+      responses:
+        '201':
+          description: Credential created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Credential"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '409':
+          description: Conflict - Credential already exists for this credential type
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Credential"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/people/{person_id}/credentials/{id}":
+    get:
+      summary: Get credential details
+      description: Returns details for a specific credential
+      operationId: getCredential
+      tags:
+      - credentials
+      security:
+      - OAuth2:
+        - account.person.readonly
+      parameters:
+      - name: person_id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      - name: id
+        in: path
+        description: Credential ID (hashid) or HID invitation ID (format 99xxxxxxxx)
+        required: true
+        schema:
+          type: string
+      - name: callback
+        in: query
+        description: Webhook callback ID for acknowledgment
+        required: false
+        schema:
+          type: string
+      - name: ack_token
+        in: query
+        description: Webhook acknowledgment token
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Credential details retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Credential"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    put:
+      summary: Update credential
+      description: Updates the value of an existing credential
+      operationId: updateCredential
+      tags:
+      - credentials
+      security:
+      - OAuth2:
+        - account.person
+      parameters:
+      - name: person_id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      - name: id
+        in: path
+        description: Credential ID (hashid)
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CredentialUpdateInput"
+      responses:
+        '201':
+          description: Credential updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Credential"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete credential
+      description: Deletes a credential. For HID Mobile Access credentials, this deactivates
+        the mobile credential.
+      operationId: deleteCredential
+      tags:
+      - credentials
+      security:
+      - OAuth2:
+        - account.person
+      parameters:
+      - name: person_id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      - name: id
+        in: path
+        description: Credential ID (hashid) or HID invitation ID (format 99xxxxxxxx)
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Credential deleted successfully (value-assignable credentials)
+          content:
+            text/plain:
+              schema:
+                type: string
+        '202':
+          description: Credential deletion accepted (mobile credentials processing
+            asynchronously)
+          content:
+            text/plain:
+              schema:
+                type: string
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/credentials":
+    get:
+      summary: List all credentials
+      description: Returns a paginated list of all credentials accessible to the authenticated
+        user
+      operationId: listAllCredentials
+      tags:
+      - credentials
+      security:
+      - OAuth2:
+        - account.person.readonly
+      parameters:
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of credentials retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Credential"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/events":
+    get:
+      summary: List events
+      description: |
+        Returns a paginated list of events (access control activity logs) for the authenticated user's account.
+        By default, returns person access events (admits and rejects) from the last 90 days.
+        Use `event_codes` parameter to filter by specific event types, or `level=debug` to include channel status events.
+      operationId: listEvents
+      tags:
+      - events
+      security:
+      - OAuth2:
+        - account.event.access.readonly
+      parameters:
+      - name: event_codes
+        in: query
+        description: |
+          Comma-separated list of event codes to filter by. If not specified, defaults to person access events (admits and rejects).
+          Allowed event codes include: admit codes (10-18, 70), reject codes (20-29, 71-73), channel status codes (1-3),
+          auto-unlock codes (40-42), tamper codes (90-91), door alarm codes (31-37), REX codes (30),
+          sync codes (100-107), LDAP sync codes (220, 223-225).
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+        style: form
+        explode: false
+        example: '10,11,20,21'
+      - name: first_name
+        in: query
+        description: Filter by person's first name
+        required: false
+        schema:
+          type: string
+      - name: last_name
+        in: query
+        description: Filter by person's last name
+        required: false
+        schema:
+          type: string
+      - name: channels
+        in: query
+        description: Filter by channel IDs (comma-separated)
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+        style: form
+        explode: false
+      - name: door_controllers
+        in: query
+        description: Filter by door controller IDs (alias for channels parameter)
+        required: false
+        schema:
+          type: array
+          items:
+            type: integer
+        style: form
+        explode: false
+      - name: since
+        in: query
+        description: Return events created since this timestamp. Defaults to 90 days
+          ago if not specified.
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: level
+        in: query
+        description: Set to "debug" to include channel status events in addition to
+          access events
+        required: false
+        schema:
+          type: string
+          enum:
+          - debug
+      - name: sort
+        in: query
+        description: Sort order for results
+        required: false
+        schema:
+          type: string
+          enum:
+          - ASC
+          - DESC
+          default: DESC
+      - name: "n"
+        in: query
+        description: Number of results per page (max 1000)
+        required: false
+        schema:
+          type: integer
+          default: 50
+          maximum: 1000
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      responses:
+        '200':
+          description: List of events retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Event"
+        '400':
+          description: Bad Request - Invalid event codes specified
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: bad_request
+                  error_description:
+                    type: string
+                    example: 'The following event codes are not valid for this method:
+                      999'
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/events/{id}":
+    get:
+      summary: Get event details
+      description: Returns details for a specific event by ID. Supports webhook acknowledgment
+        via callback/ack_token parameters.
+      operationId: getEvent
+      tags:
+      - events
+      security:
+      - OAuth2:
+        - account.event.access.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Event ID
+        required: true
+        schema:
+          type: integer
+      - name: callback
+        in: query
+        description: Webhook callback ID for acknowledgment
+        required: false
+        schema:
+          type: string
+      - name: ack_token
+        in: query
+        description: Webhook acknowledgment token
+        required: false
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Event details retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Event"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/group_reservations":
+    get:
+      summary: List group reservations
+      description: |
+        Returns a paginated list of present and future group reservations.
+        Group reservations temporarily assign people to groups for a specified time period.
+        Supports incremental sync via `since` or `since_utc` parameters.
+      operationId: listGroupReservations
+      tags:
+      - group_reservations
+      security:
+      - OAuth2:
+        - account.group_reservation.readonly
+      parameters:
+      - name: since
+        in: query
+        description: Return only group reservations updated since this timestamp (local
+          time)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: since_utc
+        in: query
+        description: Return only group reservations updated since this timestamp (UTC)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of group reservations retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/GroupReservation"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create group reservation
+      description: |
+        Creates a new group reservation to temporarily assign a person to one or more groups.
+        The person will be automatically added to the specified groups during the reservation period.
+      operationId: createGroupReservation
+      tags:
+      - group_reservations
+      security:
+      - OAuth2:
+        - account.group_reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/GroupReservationInput"
+      responses:
+        '201':
+          description: Group reservation created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/GroupReservation"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/group_reservations/{id}":
+    delete:
+      summary: Delete group reservation
+      description: |
+        Deletes or deactivates a group reservation. If the reservation is pending (not yet started),
+        it will be permanently deleted. If it's already active, it will be deactivated and the person
+        will be removed from the assigned groups.
+      operationId: deleteGroupReservation
+      tags:
+      - group_reservations
+      security:
+      - OAuth2:
+        - account.group_reservation
+      parameters:
+      - name: id
+        in: path
+        description: Group reservation ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Group reservation deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/groups":
+    get:
+      summary: List groups
+      description: |
+        Returns a list of all groups accessible to the authenticated user, ordered by name.
+        Groups are collections of people that can be assigned to roles for access control.
+        Groups can be static (manually assigned) or dynamic (based on LDAP/directory queries).
+        This endpoint does not support pagination.
+      operationId: listGroups
+      tags:
+      - groups
+      security:
+      - OAuth2:
+        - account.group.readonly
+      responses:
+        '200':
+          description: List of groups retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Group"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/notification_rules":
+    get:
+      summary: List notification rules
+      description: |
+        Returns a list of all notification rules for the authenticated user.
+        Notification rules define webhooks or other actions that are triggered when specific events occur.
+        This endpoint does not support pagination.
+      operationId: listNotificationRules
+      tags:
+      - notification_rules
+      security:
+      - OAuth2:
+        - account.notification_rule.readonly
+      responses:
+        '200':
+          description: List of notification rules retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/NotificationRule"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create notification rule
+      description: |
+        Creates a new notification rule to trigger webhooks or other actions when specific events occur.
+        At least one action and one event must be specified.
+      operationId: createNotificationRule
+      tags:
+      - notification_rules
+      security:
+      - OAuth2:
+        - account.notification_rule
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NotificationRuleInput"
+      responses:
+        '200':
+          description: Notification rule created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotificationRule"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/notification_rules/{id}":
+    get:
+      summary: Get notification rule details
+      description: Returns details for a specific notification rule
+      operationId: getNotificationRule
+      tags:
+      - notification_rules
+      security:
+      - OAuth2:
+        - account.notification_rule.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Notification rule ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Notification rule details retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotificationRule"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    put:
+      summary: Update notification rule
+      description: |
+        Updates an existing notification rule. This replaces all conditions, events, and actions
+        with the new values provided in the request.
+      operationId: updateNotificationRule
+      tags:
+      - notification_rules
+      security:
+      - OAuth2:
+        - account.notification_rule
+      parameters:
+      - name: id
+        in: path
+        description: Notification rule ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/NotificationRuleInput"
+      responses:
+        '200':
+          description: Notification rule updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/NotificationRule"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete notification rule
+      description: Deletes a notification rule
+      operationId: deleteNotificationRule
+      tags:
+      - notification_rules
+      security:
+      - OAuth2:
+        - account.notification_rule
+      parameters:
+      - name: id
+        in: path
+        description: Notification rule ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Notification rule deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/oauth/token":
+    post:
+      summary: Obtain access token
+      description: |
+        Exchange authorization code for an access token, or refresh an existing token.
+
+        **Authorization Code Flow:**
+        1. Direct users to `/oauth/authorize` with your client_id, redirect_uri, and requested scopes
+        2. User authorizes your application
+        3. You receive an authorization code at your redirect_uri
+        4. Exchange the code for an access token using this endpoint with `grant_type=authorization_code`
+
+        **Refreshing Tokens:**
+        - Use `grant_type=refresh_token` with a valid refresh_token to obtain a new access token
+        - Access tokens expire after 1 hour
+        - Refresh tokens are long-lived and should be stored securely
+      operationId: getAccessToken
+      tags:
+      - oauth
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+              - grant_type
+              properties:
+                grant_type:
+                  type: string
+                  enum:
+                  - authorization_code
+                  - refresh_token
+                  description: OAuth grant type (use "authorization_code" to exchange
+                    an authorization code, or "refresh_token" to refresh an access
+                    token)
+                  example: authorization_code
+                client_id:
+                  type: string
+                  description: OAuth client ID (required for all grant types)
+                  example: abc123xyz
+                client_secret:
+                  type: string
+                  description: OAuth client secret (required for confidential clients)
+                  example: secret123
+                code:
+                  type: string
+                  description: Authorization code (required when grant_type=authorization_code)
+                  example: auth_code_here
+                redirect_uri:
+                  type: string
+                  description: Redirect URI (required when grant_type=authorization_code,
+                    must match the one used in authorization request)
+                  example: https://example.com/callback
+                code_verifier:
+                  type: string
+                  description: PKCE code verifier (required if PKCE was used in authorization
+                    request)
+                  example: dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk
+                refresh_token:
+                  type: string
+                  description: Refresh token (required when grant_type=refresh_token)
+                  example: refresh_token_here
+                scope:
+                  type: string
+                  description: Space-separated list of requested scopes (optional,
+                    defaults to application's configured scopes)
+                  example: account.person.readonly account.channel.readonly
+      responses:
+        '200':
+          description: Access token issued successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - access_token
+                - token_type
+                - expires_in
+                - created_at
+                properties:
+                  access_token:
+                    type: string
+                    description: Bearer token to use for API authentication
+                    example: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+                  token_type:
+                    type: string
+                    description: Token type (always "Bearer")
+                    example: Bearer
+                  expires_in:
+                    type: integer
+                    description: Number of seconds until the access token expires
+                      (3600 = 1 hour)
+                    example: 3600
+                  refresh_token:
+                    type: string
+                    description: Refresh token to obtain a new access token (only
+                      included on initial token grant)
+                    example: refresh_token_here
+                  scope:
+                    type: string
+                    description: Space-separated list of granted scopes
+                    example: account.person.readonly account.channel.readonly
+                  created_at:
+                    type: integer
+                    description: Unix timestamp when the token was created
+                    example: 1704067200
+        '400':
+          description: Bad Request - Invalid grant, missing parameters, or invalid
+            credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    enum:
+                    - invalid_request
+                    - invalid_grant
+                    - unsupported_grant_type
+                    - invalid_scope
+                    - invalid_client
+                    example: invalid_grant
+                  error_description:
+                    type: string
+                    example: The provided authorization grant is invalid, expired,
+                      revoked, or does not match the redirection URI
+        '401':
+          description: Unauthorized - Invalid client credentials
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid_client
+                  error_description:
+                    type: string
+                    example: Client authentication failed
+  "/oauth/authorize":
+    get:
+      summary: Authorization endpoint
+      description: |
+        Initiates the OAuth 2.0 authorization code flow. Direct users to this endpoint to request authorization.
+
+        **Authorization Code Flow Steps:**
+        1. Direct the user's browser to this endpoint with required parameters
+        2. User logs in (if not already authenticated) and authorizes your application
+        3. User is redirected to your `redirect_uri` with an authorization `code` parameter
+        4. Exchange the code for an access token at `/oauth/token`
+
+        **PKCE (Proof Key for Code Exchange):**
+        For public clients (mobile/SPA applications), PKCE is recommended for security:
+        1. Generate a random `code_verifier` (43-128 characters)
+        2. Create `code_challenge` = BASE64URL(SHA256(code_verifier))
+        3. Include `code_challenge` and `code_challenge_method=S256` in this request
+        4. Include `code_verifier` when exchanging the code at `/oauth/token`
+
+        **Important Notes:**
+        - This is a browser-based flow - users will see a login/authorization screen
+        - The `redirect_uri` must be pre-registered with your OAuth application
+        - The authorization code expires after 10 minutes
+        - Some applications may be configured to skip the authorization screen (auto-approve)
+      operationId: authorizeOAuth
+      tags:
+      - oauth
+      parameters:
+      - name: response_type
+        in: query
+        required: true
+        description: OAuth response type (must be "code" for authorization code flow)
+        schema:
+          type: string
+          enum:
+          - code
+          example: code
+      - name: client_id
+        in: query
+        required: true
+        description: Your OAuth application's client ID
+        schema:
+          type: string
+          example: abc123xyz
+      - name: redirect_uri
+        in: query
+        required: true
+        description: URI to redirect to after authorization (must match registered
+          redirect URI)
+        schema:
+          type: string
+          format: uri
+          example: https://example.com/callback
+      - name: scope
+        in: query
+        required: true
+        description: Space-separated list of requested scopes (see available scopes
+          in security schemes section)
+        schema:
+          type: string
+          example: account.person.readonly account.channel.readonly
+      - name: state
+        in: query
+        required: false
+        description: Opaque value to maintain state between request and callback (recommended
+          for CSRF protection)
+        schema:
+          type: string
+          example: random_state_string_123
+      - name: code_challenge
+        in: query
+        required: false
+        description: PKCE code challenge (BASE64URL(SHA256(code_verifier)))
+        schema:
+          type: string
+          example: E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM
+      - name: code_challenge_method
+        in: query
+        required: false
+        description: PKCE code challenge method (must be S256)
+        schema:
+          type: string
+          enum:
+          - S256
+          example: S256
+      responses:
+        '302':
+          description: |
+            Redirects to redirect_uri with authorization code or error.
+
+            **Success redirect:**
+            `https://example.com/callback?code=AUTH_CODE&state=STATE`
+
+            **Error redirect:**
+            `https://example.com/callback?error=access_denied&error_description=DESCRIPTION&state=STATE`
+        '400':
+          description: Bad Request - Invalid parameters
+          content:
+            text/html:
+              schema:
+                type: string
+                description: HTML error page displayed to user
+  "/oauth/revoke":
+    post:
+      summary: Revoke access token or refresh token
+      description: |
+        Revokes an access token or refresh token, immediately invalidating it and blocking associated tokens from making further requests.
+
+        **When to revoke:**
+        - User disconnects their DoorFlow account from your integration
+        - User logs out
+        - Security breach - revoke compromised tokens
+        - Application uninstall
+
+        **Important:**
+        - **We recommend revoking the refresh_token** - this will invalidate all associated access tokens
+        - Returns HTTP 200 even if the token was already invalid (prevents token scanning attacks)
+        - Client authentication is required via HTTP Basic Auth header
+
+        **Authentication:**
+        You must authenticate using HTTP Basic Authentication with your client credentials:
+        1. Combine your client_id and client_secret as: `{client_id}:{client_secret}`
+        2. Encode using URL-safe Base64
+        3. Include in Authorization header: `Authorization: Basic {encoded_credentials}`
+      operationId: revokeToken
+      tags:
+      - oauth
+      security:
+      - basicAuth: []
+      parameters:
+      - name: Authorization
+        in: header
+        required: true
+        description: HTTP Basic Authentication using client_id:client_secret encoded
+          with URL-safe Base64
+        schema:
+          type: string
+          example: Basic Y2xpZW50X2lkOmNsaWVudF9zZWNyZXQ=
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              required:
+              - token
+              properties:
+                token:
+                  type: string
+                  description: The access token or refresh token to revoke (we recommend
+                    using refresh_token)
+                  example: cF9I4MzZcKmhHVw6X2S1u7379LZNqtTUL9q8tmp3Bw0
+                token_type_hint:
+                  type: string
+                  enum:
+                  - access_token
+                  - refresh_token
+                  description: |
+                    Optional hint about the type of token being revoked.
+                    We recommend using 'refresh_token' for all revocations as it invalidates all associated tokens.
+                    Invalid token type hint values are ignored and do not affect the revocation response.
+                  example: refresh_token
+      responses:
+        '200':
+          description: |
+            Token revocation successful or token was already invalid.
+
+            Returns HTTP 200 even for invalid tokens because:
+            - The client cannot handle such errors in a reasonable way
+            - The purpose of invalidating the token is already achieved
+            - Prevents information leakage about token validity
+
+            Empty JSON response body.
+          content:
+            application/json:
+              schema:
+                type: object
+                example: {}
+        '403':
+          description: |
+            Forbidden - Client credentials not submitted correctly or you are not authorized to revoke this token.
+
+            Common causes:
+            - Not using HTTP Basic Authentication scheme
+            - Credentials not encoded with URL-safe Base64
+            - Attempting to revoke a token that belongs to another client
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: unauthorized_client
+                  error_description:
+                    type: string
+                    example: You are not authorized to revoke this token
+  "/oauth/token/info":
+    get:
+      summary: Get token information
+      description: |
+        Returns information about the current access token being used for authentication.
+
+        This endpoint provides metadata about the access token including the resource owner,
+        account, scopes, and expiration.
+
+        **Authentication:**
+        Requires a valid OAuth2 access token in the Authorization header.
+      operationId: getTokenInfo
+      tags:
+      - oauth
+      security:
+      - OAuth2: []
+      responses:
+        '200':
+          description: Token information retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                - resource_owner_id
+                - scope
+                - expires_in
+                - created_at
+                properties:
+                  resource_owner_id:
+                    type: integer
+                    description: ID of the user (resource owner) who authorized this
+                      token
+                    example: 12345
+                  account_id:
+                    type: string
+                    description: Hashid of the account associated with the resource
+                      owner
+                    example: abc123xyz
+                  scope:
+                    type: array
+                    items:
+                      type: string
+                    description: Array of OAuth scopes granted to this token
+                    example:
+                    - account.person.readonly
+                    - account.channel.readonly
+                  expires_in:
+                    type: integer
+                    description: Number of seconds until the token expires
+                    example: 7200
+                  application:
+                    type: object
+                    properties:
+                      uid:
+                        type: string
+                        description: Unique identifier of the OAuth application
+                        example: abc123def456
+                  created_at:
+                    type: integer
+                    description: Unix timestamp when the token was created
+                    example: 1704067200
+        '401':
+          description: Unauthorized - Invalid or missing access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: invalid_token
+                  error_description:
+                    type: string
+                    example: The access token is invalid or has expired
+  "/api/3/people":
+    get:
+      summary: List people
+      description: Returns a paginated list of people accessible to the authenticated
+        user. Supports incremental sync via `since` or `since_utc` parameters.
+      operationId: listPeople
+      tags:
+      - people
+      security:
+      - OAuth2:
+        - account.person.readonly
+      parameters:
+      - name: email
+        in: query
+        description: Filter by email (case-insensitive partial match)
+        required: false
+        schema:
+          type: string
+      - name: system_id
+        in: query
+        description: Filter by organisation system ID
+        required: false
+        schema:
+          type: string
+      - name: since
+        in: query
+        description: Return only people updated since this timestamp (local time)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: since_utc
+        in: query
+        description: Return only people updated since this timestamp (UTC)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 50
+          maximum: 100
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of people retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Person"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create person
+      description: Creates a new person record with optional group and role assignments
+      operationId: createPerson
+      tags:
+      - people
+      security:
+      - OAuth2:
+        - account.person
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PersonInput"
+      responses:
+        '201':
+          description: Person created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Person"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/people/{id}":
+    get:
+      summary: Get person details
+      description: Returns details for a specific person
+      operationId: getPerson
+      tags:
+      - people
+      security:
+      - OAuth2:
+        - account.person.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Person details retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Person"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    put:
+      summary: Update person
+      description: Updates an existing person record. Can modify group and role assignments.
+        Setting `image_remote_url` to empty string will delete the image.
+      operationId: updatePerson
+      tags:
+      - people
+      security:
+      - OAuth2:
+        - account.person
+      parameters:
+      - name: id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/PersonInput"
+      responses:
+        '201':
+          description: Person updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Person"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete person
+      description: Soft-deletes a person record. This removes them from the system
+        but retains audit trail.
+      operationId: deletePerson
+      tags:
+      - people
+      security:
+      - OAuth2:
+        - account.person
+      parameters:
+      - name: id
+        in: path
+        description: Person ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Person deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/reservations":
+    get:
+      summary: List reservations
+      description: |
+        Returns a paginated list of future reservations.
+        Reservations grant temporary access to specific channels (door controllers) for a person within a specified time window.
+        Supports incremental sync via `since` or `since_utc` parameters.
+      operationId: listReservations
+      tags:
+      - reservations
+      security:
+      - OAuth2:
+        - account.reservation.readonly
+      parameters:
+      - name: since
+        in: query
+        description: Return only reservations updated since this timestamp (local
+          time)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: since_utc
+        in: query
+        description: Return only reservations updated since this timestamp (UTC)
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of reservations retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Reservation"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create reservation
+      description: |
+        Creates a new reservation to grant temporary access to specific channels for a person.
+        The start and end times must fall on the same day in the account's time zone.
+        Automatically creates a role and shift for the reservation period.
+      operationId: createReservation
+      tags:
+      - reservations
+      security:
+      - OAuth2:
+        - account.reservation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ReservationInput"
+      responses:
+        '201':
+          description: Reservation created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/Reservation"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/reservations/{id}":
+    delete:
+      summary: Delete reservation
+      description: |
+        Deletes a reservation, removing the temporary access grant.
+        This will also delete the associated role and shift.
+      operationId: deleteReservation
+      tags:
+      - reservations
+      security:
+      - OAuth2:
+        - account.reservation
+      parameters:
+      - name: id
+        in: path
+        description: Reservation ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Reservation deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/roles":
+    get:
+      summary: List roles
+      description: |
+        Returns a list of all roles accessible to the authenticated user, ordered by name.
+        Roles define which channels (door controllers) people or groups have access to, optionally within specific time shifts.
+        This endpoint does not support pagination.
+      operationId: listRoles
+      tags:
+      - roles
+      security:
+      - OAuth2:
+        - account.role.readonly
+      responses:
+        '200':
+          description: List of roles retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Role"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/sites":
+    get:
+      summary: List sites
+      description: |
+        Returns a paginated list of sites (physical locations) accessible to the authenticated user.
+        Sites are used to organize channels (door controllers) by physical location and can have
+        their own time zones and IP address ranges.
+      operationId: listSites
+      tags:
+      - sites
+      security:
+      - OAuth2:
+        - account.site.readonly
+      parameters:
+      - name: per_page
+        in: query
+        description: Number of results per page
+        required: false
+        schema:
+          type: integer
+          default: 500
+      - name: page
+        in: query
+        description: Page number for pagination
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: skip_pagination
+        in: query
+        description: Skip pagination and return all results
+        required: false
+        schema:
+          type: boolean
+      responses:
+        '200':
+          description: List of sites retrieved successfully
+          headers:
+            Total:
+              schema:
+                type: integer
+              description: Total number of records
+            Per-Page:
+              schema:
+                type: integer
+              description: Number of records per page
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/Site"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/sync":
+    post:
+      summary: Initiate sync
+      description: |
+        Triggers a synchronization process to push pending changes to all door controllers.
+        This endpoint initiates the sync if there are unsynced changes in the account.
+        The sync process is rate-limited to prevent excessive sync requests.
+      operationId: initiateSync
+      tags:
+      - sync
+      security:
+      - OAuth2:
+        - account.sync
+      responses:
+        '200':
+          description: Sync initiated successfully (or no changes to sync)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '429':
+          "$ref": "#/components/responses/RateLimitedError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+components:
+  schemas:
+    Account:
+      type: object
+      required:
+      - id
+      - name
+      - time_zone
+      - monitored
+      - sync
+      - user
+      - passport
+      properties:
+        id:
+          type: string
+          description: Unique hashid identifier for the account
+          example: abc123xyz
+        name:
+          type: string
+          description: Name of the account
+          example: Acme Corporation
+        time_zone:
+          type: string
+          description: Account's time zone (IANA time zone database format)
+          example: America/New_York
+        monitored:
+          type: boolean
+          description: Whether the account is being monitored
+          example: true
+        reseller:
+          type: object
+          nullable: true
+          description: Reseller information if account has an associated reseller
+          properties:
+            id:
+              type: integer
+              description: Reseller ID
+            name:
+              type: string
+              description: Reseller name
+            support_contact:
+              type: string
+              description: Support contact name
+              nullable: true
+            support_email:
+              type: string
+              format: email
+              description: Support email address
+              nullable: true
+            support_telephone:
+              type: string
+              description: Support telephone number
+              nullable: true
+        sync:
+          type: object
+          required:
+          - status
+          - last_sync
+          description: Synchronization status information
+          properties:
+            status:
+              type: string
+              enum:
+              - complete
+              - failing
+              - syncing
+              - pending
+              description: Current sync status
+            last_sync:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp of last sync initiation
+            description:
+              type: string
+              nullable: true
+              description: Detailed description of sync status (e.g., "2 of 5 failed")
+        user:
+          type: object
+          required:
+          - id
+          - first_name
+          - last_name
+          - email
+          description: Current authenticated user information
+          properties:
+            id:
+              type: integer
+              description: User ID
+            first_name:
+              type: string
+              description: User's first name
+            last_name:
+              type: string
+              description: User's last name
+            email:
+              type: string
+              format: email
+              description: User's email address
+        passport:
+          type: object
+          required:
+          - remote_unlock_enabled
+          - hid_mobile_access
+          description: Mobile access features configuration
+          properties:
+            remote_unlock_enabled:
+              type: boolean
+              description: Whether passport remote unlock is enabled
+            hid_mobile_access:
+              type: boolean
+              description: Whether HID mobile access is configured
+    Error:
+      type: object
+      required:
+      - error
+      - error_description
+      properties:
+        error:
+          type: string
+          description: Error code
+          example: unauthorized
+        error_description:
+          type: string
+          description: Human-readable error description
+          example: The access token is invalid
+    AdmissionRequest:
+      type: object
+      required:
+      - id
+      - status
+      - channel_id
+      - requested_at
+      - door_controller
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the admission request (Event ID)
+          example: 123456789
+        status:
+          type: string
+          enum:
+          - pending
+          - admitted
+          - denied
+          - offline
+          - timeout
+          description: |
+            Current status of the admission request:
+            - pending: Waiting for door controller response
+            - admitted: Person successfully admitted (event codes 15, 16, 50)
+            - denied: Access denied (event code 51)
+            - offline: Door controller offline (event code 52)
+            - timeout: No response received within 2 minutes
+          example: admitted
+        channel_id:
+          type: integer
+          description: ID of the channel (door controller)
+          example: 1340
+        person_id:
+          type: integer
+          nullable: true
+          description: ID of the person (null for general admit requests)
+          example: 12345
+        requested_at:
+          type: string
+          format: date-time
+          description: Timestamp when the admission was requested
+          example: '2024-01-15T14:30:00.000Z'
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: Timestamp when the admission completed (null if still pending)
+          example: '2024-01-15T14:30:02.500Z'
+        door_controller:
+          type: object
+          description: Information about the door controller
+          properties:
+            id:
+              type: integer
+              description: Door controller ID
+              example: 1340
+            name:
+              type: string
+              description: Door controller name
+              example: Front Door
+        person:
+          type: object
+          nullable: true
+          description: Information about the person (null for general admit or if
+            person not found)
+          properties:
+            id:
+              type: integer
+              description: Person ID
+              example: 12345
+            name:
+              type: string
+              description: Person name
+              example: John Doe
+    Channel:
+      type: object
+      required:
+      - id
+      - name
+      - mac_address
+      - status
+      - unit
+      - sync
+      - mode
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the channel
+          example: 1340
+        name:
+          type: string
+          description: Name of the channel/door controller
+          example: Front Door
+        mac_address:
+          type: string
+          description: MAC address of the controller (format aa:bb:cc:dd:ee:ff)
+          pattern: "^([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2}$"
+          example: 00:11:22:33:44:55
+        status:
+          type: string
+          enum:
+          - online
+          - offline
+          - pending_encryption
+          description: Current connection status of the channel
+        unit:
+          type: integer
+          description: Unit number for multi-channel controllers
+          example: 1
+        model:
+          type: string
+          nullable: true
+          description: Controller model number
+          example: IPBR-2
+        model_long:
+          type: string
+          description: Full descriptive model name
+          example: 2 channel IP Controller
+        serial_number:
+          type: string
+          nullable: true
+          description: Serial number of the controller
+        card_format:
+          type: string
+          nullable: true
+          description: Card format configuration
+        pin_format:
+          type: string
+          nullable: true
+          description: PIN format configuration
+        freescale_version:
+          type: string
+          nullable: true
+          description: Freescale firmware version
+        pic_version:
+          type: string
+          nullable: true
+          description: PIC firmware version
+        reader_device_class_name:
+          type: string
+          nullable: true
+          description: Reader device class identifier
+        site_id:
+          type: integer
+          nullable: true
+          description: ID of the site this channel belongs to
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        sync:
+          type: object
+          required:
+          - status
+          - last_sync_completed_at
+          description: Synchronization status information
+          properties:
+            status:
+              type: string
+              enum:
+              - ok
+              - fail
+              - syncing
+              - pending
+              description: Current sync status
+            last_sync_completed_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp of last successful sync completion
+        lockdown:
+          type: object
+          nullable: true
+          description: Lockdown mode configuration (null if not in lockdown)
+          properties:
+            message:
+              type: string
+              description: Lockdown status message
+              example: Cards and PINs will be rejected
+            card_lockdown:
+              type: object
+              properties:
+                state:
+                  type: boolean
+                  description: Whether card access is locked down
+            rex_lockdown:
+              type: object
+              properties:
+                state:
+                  type: boolean
+                  description: Whether REX (Request to Exit) is locked down
+            aux_lockdown:
+              type: object
+              properties:
+                state:
+                  type: boolean
+                  description: Whether auxiliary input is locked down
+        mode:
+          type: object
+          required:
+          - description
+          description: Current operating mode of the channel
+          properties:
+            description:
+              type: string
+              enum:
+              - unlock
+              - normal
+              description: Current mode
+            relock_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: Time when door will automatically relock (if in unlock
+                mode)
+            change_stamp:
+              type: string
+              format: date-time
+              nullable: true
+              description: Timestamp when mode was last changed
+        auto_unlock:
+          type: object
+          nullable: true
+          description: Auto-unlock shift configuration (null if not configured)
+          properties:
+            id:
+              type: integer
+              description: Shift ID
+            name:
+              type: string
+              description: Shift name
+    CredentialType:
+      type: object
+      required:
+      - id
+      - label
+      - slug
+      - code
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the credential type
+          example: 5
+        label:
+          type: string
+          description: Human-readable label for the credential type (must be unique
+            within account)
+          example: Employee Card
+        slug:
+          type: string
+          description: URL-friendly identifier used in API requests (must be unique
+            within account, auto-parameterized)
+          example: employee_card
+        code:
+          type: integer
+          nullable: true
+          description: Numeric code from the associated global credential type
+          example: 100
+    Credential:
+      type: object
+      required:
+      - id
+      - credential_type_id
+      - person_id
+      - label
+      properties:
+        id:
+          type: string
+          description: Unique hashid identifier for the credential
+          example: abc123xyz
+        credential_type_id:
+          type: integer
+          description: ID of the credential type
+          example: 5
+        label:
+          type: string
+          description: Human-readable label for the credential type
+          example: Card Number
+        person_id:
+          type: integer
+          description: ID of the person this credential belongs to
+          example: 12345
+        value:
+          type: string
+          nullable: true
+          description: Credential value (only present for value-assignable credential
+            types like cards, PINs, etc. Not present for mobile credentials)
+          example: '1234567890'
+        status:
+          type: string
+          nullable: true
+          description: Status for mobile credentials (HID Mobile Access)
+          enum:
+          - invited
+          - active
+          - revoking
+          - revoked
+          example: active
+        url:
+          type: string
+          nullable: true
+          description: PassFlow credential URL (only for PassFlow credentials in invited
+            state)
+        wallet_type:
+          type: string
+          nullable: true
+          description: Wallet type for PassFlow credentials that have been added to
+            wallet
+          enum:
+          - apple
+          - google
+    CredentialInput:
+      type: object
+      required:
+      - person_credential
+      properties:
+        person_credential:
+          type: object
+          required:
+          - credential_type_id
+          properties:
+            credential_type_id:
+              type: integer
+              description: ID of the credential type (required)
+              example: 5
+            value:
+              type: string
+              nullable: true
+              description: Credential value (for card numbers, PINs, etc. Use "******"
+                to auto-generate a random PIN)
+              example: '1234567890'
+            person_id:
+              type: integer
+              nullable: true
+              description: Person ID (typically derived from URL path parameter)
+    CredentialUpdateInput:
+      type: object
+      required:
+      - person_credential
+      properties:
+        person_credential:
+          type: object
+          required:
+          - value
+          properties:
+            value:
+              type: string
+              description: New credential value
+              example: '9876543210'
+    Event:
+      type: object
+      required:
+      - id
+      - event_code
+      - event_label
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the event
+          example: 123456789
+        event_id:
+          type: integer
+          nullable: true
+          description: Same as id (legacy field for backward compatibility)
+          example: 123456789
+        event_code:
+          type: integer
+          description: |
+            Numeric code identifying the event type. Common codes:
+            - 10-18: Admit events (card, PIN, manual, REX, AUX, application, unlocked, Apple, Google)
+            - 20-29: Reject events (card, out of hours, lockdown, tamper, PIN, timeout, invalid type, unauthorized, pass-back, offline)
+            - 30: REX pressed
+            - 31-37: Door state/alarm events
+            - 40-42: Auto-unlock shift events
+            - 50-63: Remote control events
+            - 70-73: Multi-factor authentication events
+            - 90-91: Tamper events
+            - 100-107: Channel sync events
+          example: 10
+        event_label:
+          type: string
+          description: Human-readable description of the event
+          example: John Doe admitted using card
+        door_controller_id:
+          type: integer
+          nullable: true
+          description: ID of the door controller (channel) where the event occurred
+          example: 1340
+        door_controller_name:
+          type: string
+          nullable: true
+          description: Name of the door controller (channel)
+          example: Front Door
+        channel_id:
+          type: integer
+          nullable: true
+          description: Alias for door_controller_id
+          example: 1340
+        channel_name:
+          type: string
+          nullable: true
+          description: Alias for door_controller_name
+          example: Front Door
+        person_id:
+          type: integer
+          nullable: true
+          description: ID of the person associated with this event (for access events)
+          example: 12345
+        person_name:
+          type: string
+          nullable: true
+          description: Name of the person associated with this event
+          example: John Doe
+        credentials_number:
+          type: string
+          nullable: true
+          description: Credential number used (card number, PIN, etc.)
+          example: '1234567890'
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp when the event occurred
+          example: '2024-01-15T14:30:00.000Z'
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp when the event record was last updated
+          example: '2024-01-15T14:30:00.000Z'
+    GroupReservation:
+      type: object
+      required:
+      - id
+      - person_id
+      - start_time
+      - end_time
+      - state
+      - group_ids
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the group reservation
+          example: 456
+        person_id:
+          type: integer
+          description: ID of the person assigned to the groups
+          example: 12345
+        start_time:
+          type: string
+          format: date-time
+          description: Start time of the group reservation
+          example: '2024-01-15T09:00:00.000Z'
+        end_time:
+          type: string
+          format: date-time
+          description: End time of the group reservation (must be after start time
+            and in the future)
+          example: '2024-01-15T17:00:00.000Z'
+        state:
+          type: string
+          enum:
+          - pending
+          - active
+          - deactivated
+          description: Current state of the reservation (pending = not started, active
+            = in progress, deactivated = cancelled or completed)
+          example: active
+        group_ids:
+          type: array
+          description: Array of group IDs the person is assigned to during this reservation
+          items:
+            type: integer
+          example:
+          - 1
+          - 3
+          - 5
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+    GroupReservationInput:
+      type: object
+      required:
+      - group_reservation
+      properties:
+        group_reservation:
+          type: object
+          required:
+          - person_id
+          - start_time
+          - end_time
+          - group_ids
+          properties:
+            person_id:
+              type: integer
+              description: ID of the person to assign to groups (must belong to the
+                same account)
+              example: 12345
+            start_time:
+              type: string
+              format: date-time
+              description: Start time of the group reservation
+              example: '2024-01-15T09:00:00.000Z'
+            end_time:
+              type: string
+              format: date-time
+              description: End time of the group reservation (must be after start
+                time and in the future)
+              example: '2024-01-15T17:00:00.000Z'
+            group_ids:
+              type: array
+              description: Array of group IDs to assign the person to (at least one
+                required, all must belong to the account)
+              items:
+                type: integer
+              minItems: 1
+              example:
+              - 1
+              - 3
+              - 5
+    Group:
+      type: object
+      required:
+      - id
+      - name
+      - global_across_sites
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the group
+          example: 15
+        name:
+          type: string
+          description: Name of the group (must be present)
+          example: Marketing Team
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this group
+          example: Access to marketing floor and conference rooms
+        global_across_sites:
+          type: boolean
+          description: Whether this group applies across all sites in multi-site deployments
+          example: false
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+    NotificationRule:
+      type: object
+      required:
+      - id
+      - name
+      - active
+      - conditions
+      - events
+      - actions
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the notification rule
+          example: 100
+        name:
+          type: string
+          description: Name of the notification rule
+          example: Webhook for door access events
+        active:
+          type: boolean
+          description: Whether this notification rule is currently active
+          example: true
+        conditions:
+          type: array
+          description: Conditions that must be met for the rule to trigger
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: Type of condition (e.g., "door_controller_id")
+                example: door_controller_id
+              type_description:
+                type: string
+                description: Human-readable description of the condition type
+                example: Door Controller
+              value:
+                type: string
+                description: Value to match against
+                example: '1340'
+        events:
+          type: array
+          description: Events that trigger this rule (at least one required)
+          items:
+            type: object
+            properties:
+              code:
+                type: integer
+                description: Event code that triggers this rule
+                example: 10
+              name:
+                type: string
+                description: Human-readable name of the event
+                example: Admit Card
+          minItems: 1
+        actions:
+          type: array
+          description: Actions to perform when the rule triggers (at least one required)
+          items:
+            type: object
+            properties:
+              type:
+                type: integer
+                description: Type of action (0 = webhook callback)
+                example: 0
+              type_description:
+                type: string
+                description: Human-readable description of the action type
+                example: Callback URL
+              data:
+                type: string
+                description: Action data (e.g., webhook URL)
+                example: https://example.com/webhook
+          minItems: 1
+    NotificationRuleInput:
+      type: object
+      required:
+      - name
+      - call_back_url
+      - match_event_codes
+      properties:
+        name:
+          type: string
+          description: Name of the notification rule (required)
+          example: Webhook for door access events
+        active:
+          type: boolean
+          description: Whether this notification rule is active
+          default: true
+          example: true
+        call_back_url:
+          type: string
+          format: uri
+          description: Webhook callback URL to trigger when events occur (required)
+          example: https://example.com/webhook
+        match_event_codes:
+          type: array
+          description: Array of event codes that trigger this rule (at least one required)
+          items:
+            type: integer
+          minItems: 1
+          example:
+          - 10
+          - 11
+          - 20
+        match_controller_ids:
+          type: array
+          description: Array of door controller IDs to filter events (optional - if
+            omitted, matches all controllers)
+          items:
+            type: integer
+          example:
+          - 1340
+          - 1341
+    Person:
+      type: object
+      required:
+      - id
+      - first_name
+      - last_name
+      - enabled
+      - groups
+      - roles
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the person
+          example: 12345
+        first_name:
+          type: string
+          description: First name (required)
+          example: John
+        last_name:
+          type: string
+          description: Last name (required)
+          example: Doe
+        salutation:
+          type: string
+          nullable: true
+          description: Salutation or title (Mr., Ms., Dr., etc.)
+          example: Mr.
+        job_title:
+          type: string
+          nullable: true
+          description: Job title
+          example: Software Engineer
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email address (must be unique within account if provided)
+          example: john.doe@example.com
+        organisation_id:
+          type: integer
+          nullable: true
+          description: Organisation ID
+        system_id:
+          type: string
+          nullable: true
+          description: External system identifier
+          example: EMP-12345
+        department:
+          type: string
+          nullable: true
+          description: Department name
+          example: Engineering
+        enabled:
+          type: boolean
+          description: Whether the person is currently enabled for access
+          example: true
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+          description: Access valid from this date/time
+        valid_to:
+          type: string
+          format: date-time
+          nullable: true
+          description: Access valid until this date/time
+        image_url:
+          type: string
+          nullable: true
+          description: URL to person's full-size photo
+        image_thumbnail_url:
+          type: string
+          nullable: true
+          description: URL to person's thumbnail photo
+        telephone:
+          type: string
+          nullable: true
+          description: Telephone number
+        mobile:
+          type: string
+          nullable: true
+          description: Mobile number (E.164 format required if passport enabled)
+          example: "+14155551234"
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes
+        barcode:
+          type: string
+          nullable: true
+          description: Barcode identifier
+        custom_1:
+          type: string
+          nullable: true
+          description: Custom field 1
+        custom_2:
+          type: string
+          nullable: true
+          description: Custom field 2
+        custom_3:
+          type: string
+          nullable: true
+          description: Custom field 3
+        custom_4:
+          type: string
+          nullable: true
+          description: Custom field 4
+        custom_5:
+          type: string
+          nullable: true
+          description: Custom field 5
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+        groups:
+          type: array
+          description: Array of group IDs this person belongs to
+          items:
+            type: integer
+          example:
+          - 1
+          - 3
+          - 5
+        roles:
+          type: array
+          description: Array of role IDs assigned to this person
+          items:
+            type: integer
+          example:
+          - 2
+          - 4
+      additionalProperties:
+        description: Dynamic credential type fields (e.g., card_number, pin, etc.)
+          based on account configuration
+    PersonInput:
+      type: object
+      properties:
+        first_name:
+          type: string
+          description: First name (required for creation)
+          example: John
+        last_name:
+          type: string
+          description: Last name (required for creation)
+          example: Doe
+        salutation:
+          type: string
+          nullable: true
+          description: Salutation or title
+        job_title:
+          type: string
+          nullable: true
+          description: Job title
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Email address (must be unique within account if provided)
+        department:
+          type: string
+          nullable: true
+          description: Department name
+        enabled:
+          type: boolean
+          description: Whether the person is enabled for access
+          default: true
+        valid_from:
+          type: string
+          format: date-time
+          nullable: true
+          description: Access valid from this date/time
+        valid_to:
+          type: string
+          format: date-time
+          nullable: true
+          description: Access valid until this date/time
+        image_base64:
+          type: string
+          nullable: true
+          description: Base64-encoded image data for person's photo
+        image_remote_url:
+          type: string
+          nullable: true
+          description: Remote URL to fetch person's photo from (set to empty string
+            to delete image)
+        telephone:
+          type: string
+          nullable: true
+          description: Telephone number
+        mobile:
+          type: string
+          nullable: true
+          description: Mobile number (E.164 format if passport enabled)
+          example: "+14155551234"
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes
+        barcode:
+          type: string
+          nullable: true
+          description: Barcode identifier
+        system_id:
+          type: string
+          nullable: true
+          description: External system identifier
+        organisation_id:
+          type: integer
+          nullable: true
+          description: Organisation ID
+        custom_1:
+          type: string
+          nullable: true
+          description: Custom field 1
+        custom_2:
+          type: string
+          nullable: true
+          description: Custom field 2
+        custom_3:
+          type: string
+          nullable: true
+          description: Custom field 3
+        custom_4:
+          type: string
+          nullable: true
+          description: Custom field 4
+        custom_5:
+          type: string
+          nullable: true
+          description: Custom field 5
+        group_ids:
+          type: array
+          description: Array of group IDs to assign this person to
+          items:
+            type: integer
+          example:
+          - 1
+          - 3
+          - 5
+        role_ids:
+          type: array
+          description: Array of role IDs to assign to this person (requires permission)
+          items:
+            type: integer
+          example:
+          - 2
+          - 4
+        deleted:
+          type: boolean
+          description: Mark person as deleted (used internally)
+      additionalProperties:
+        description: Dynamic credential type fields (e.g., card_number, pin, etc.)
+          based on account configuration
+    Reservation:
+      type: object
+      required:
+      - id
+      - person_id
+      - start_time
+      - end_time
+      - channel_ids
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the reservation
+          example: 789
+        person_id:
+          type: integer
+          description: ID of the person granted temporary access
+          example: 12345
+        start_time:
+          type: string
+          format: date-time
+          description: Start time of the reservation
+          example: '2024-01-15T09:00:00.000Z'
+        end_time:
+          type: string
+          format: date-time
+          description: End time of the reservation (must be after start time and on
+            the same day)
+          example: '2024-01-15T17:00:00.000Z'
+        channel_ids:
+          type: array
+          description: Array of channel (door controller) IDs the person has access
+            to during this reservation
+          items:
+            type: integer
+          example:
+          - 1340
+          - 1341
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+    ReservationInput:
+      type: object
+      required:
+      - person_id
+      - start_time
+      - end_time
+      properties:
+        person_id:
+          type: integer
+          description: ID of the person to grant temporary access (must belong to
+            the same account)
+          example: 12345
+        start_time:
+          type: string
+          format: date-time
+          description: Start time of the reservation
+          example: '2024-01-15T09:00:00.000Z'
+        end_time:
+          type: string
+          format: date-time
+          description: End time of the reservation (must be after start time and on
+            the same day in account time zone)
+          example: '2024-01-15T17:00:00.000Z'
+        channel_ids:
+          type: array
+          description: Array of channel IDs to grant access to (at least one required,
+            all must be accessible to the creator)
+          items:
+            type: integer
+          minItems: 1
+          example:
+          - 1340
+          - 1341
+        door_controller_ids:
+          type: array
+          description: Alias for channel_ids
+          items:
+            type: integer
+          minItems: 1
+          example:
+          - 1340
+          - 1341
+    Role:
+      type: object
+      required:
+      - id
+      - name
+      - created_at
+      - updated_at
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the role
+          example: 42
+        name:
+          type: string
+          description: Name of the role (must be unique within the account)
+          example: Office Staff
+        shift_id:
+          type: integer
+          nullable: true
+          description: ID of the shift defining when this role grants access (null
+            means 24/7 access)
+          example: 10
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this role
+          example: Access to main building during business hours
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+    Site:
+      type: object
+      required:
+      - id
+      - name
+      - site_ips
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the site
+          example: 25
+        name:
+          type: string
+          description: Name of the site (required)
+          example: Main Office
+        ip_address:
+          type: string
+          nullable: true
+          description: Primary IP address for the site (deprecated - use site_ips
+            instead)
+          example: 192.168.1.0/24
+        time_zone:
+          type: string
+          nullable: true
+          description: IANA time zone identifier for this site
+          example: America/New_York
+        notes:
+          type: string
+          nullable: true
+          description: Additional notes about this site
+          example: Corporate headquarters building
+        site_ips:
+          type: array
+          description: Array of IP address ranges associated with this site
+          items:
+            type: object
+            properties:
+              ip_address:
+                type: string
+                description: IP address or CIDR range
+                example: 192.168.1.0/24
+  responses:
+    UnauthorizedError:
+      description: Unauthorized - Invalid or missing authentication
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: unauthorized
+              error_description:
+                type: string
+                example: The access token is invalid
+    ForbiddenError:
+      description: Forbidden - User does not have permission
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: forbidden
+              error_description:
+                type: string
+                example: You are not authorized to access this resource
+    NotFoundError:
+      description: Not Found - Resource does not exist or is not an admission request
+        event
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: not_found
+              error_description:
+                type: string
+                example: The requested resource was not found
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: internal_server_error
+              error_description:
+                type: string
+                example: An unexpected error occurred
+    UnprocessableEntityError:
+      description: Unprocessable Entity - Validation failed
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Error message
+              errors:
+                type: object
+                description: Field-specific validation errors
+                properties:
+                  value:
+                    type: array
+                    description: Validation errors for the credential value
+                    items:
+                      type: string
+                    example:
+                    - value is already in use on your account
+                    - must be between 4 and 7 digits in length
+                  credential_type_id:
+                    type: array
+                    description: Validation errors for the credential type
+                    items:
+                      type: string
+                    example:
+                    - Not found for this account
+                  limit_reached:
+                    type: string
+                    description: License limit error message
+                    example: You have reached your HID Mobile licence limit. Please
+                      contact DoorFlow Support.
+    RateLimitedError:
+      description: Too Many Requests - Sync rate limit exceeded
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+            - error
+            - description
+            - retry_in
+            properties:
+              error:
+                type: string
+                enum:
+                - rate_limited
+                description: Error code indicating rate limiting
+                example: rate_limited
+              description:
+                type: string
+                description: Human-readable description of the rate limit
+                example: Sync rate limit exceeded. Please wait before trying again.
+              retry_in:
+                type: integer
+                description: Number of seconds to wait before retrying
+                example: 60
+  securitySchemes:
+    OAuth2:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: "/oauth/authorize"
+          tokenUrl: "/oauth/token"
+          scopes: {}
+    basicAuth:
+      type: http
+      scheme: basic
+      description: |
+        HTTP Basic Authentication using OAuth client credentials.
+
+        Encode your client_id and client_secret as: `{client_id}:{client_secret}`
+        using URL-safe Base64 encoding.
