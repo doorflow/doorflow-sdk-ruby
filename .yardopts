@@ -5,6 +5,7 @@
 --readme README.md
 --title "DoorFlow Ruby SDK Documentation"
 --exclude spec
+--exclude lib/doorflow-api
 lib/**/*.rb
 -
 LICENSE
