@@ -54,7 +54,12 @@ module DoorFlow
     def configure_client
       DoorFlow.configure do |config|
         config.access_token = @api_key if @api_key
-        config.host = @api_base.gsub(/https?:\/\//, '') if @api_base
+        if @api_base
+          # Parse the URL to extract scheme and host
+          uri = URI.parse(@api_base)
+          config.scheme = uri.scheme if uri.scheme
+          config.host = uri.host if uri.host
+        end
       end
     end
   end
