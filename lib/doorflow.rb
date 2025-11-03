@@ -1,5 +1,5 @@
 # DoorFlow Ruby SDK - Idiomatic Ruby wrapper
-require 'doorflow_api'
+require 'doorflow-api'
 
 # Core extensions
 require 'doorflow/configuration'
