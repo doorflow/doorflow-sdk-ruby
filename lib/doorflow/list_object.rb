@@ -1,9 +1,42 @@
 module DoorFlow
+  # A collection of resources with pagination support
+  #
+  # ListObject wraps arrays of resources returned from list operations
+  # and provides convenient iteration and pagination methods.
+  #
+  # @example Basic iteration
+  #   people = DoorFlow::Person.list
+  #   people.each { |person| puts person.name }
+  #
+  # @example Accessing pagination metadata
+  #   people = DoorFlow::Person.list(page: 2, per_page: 50)
+  #   puts "Page #{people.page} of #{people.total / people.per_page}"
+  #
+  # @example Auto-pagination (fetch all pages)
+  #   people = DoorFlow::Person.list
+  #   people.auto_paging_each { |person| puts person.email }
   class ListObject
     include Enumerable
 
-    attr_reader :data, :total, :page, :per_page
+    # @return [Array] the array of resource objects
+    attr_reader :data
 
+    # @return [Integer, nil] total number of items across all pages
+    attr_reader :total
+
+    # @return [Integer, nil] current page number
+    attr_reader :page
+
+    # @return [Integer, nil] number of items per page
+    attr_reader :per_page
+
+    # Create a new list object
+    #
+    # @param data [Array] array of resource instances
+    # @param total [Integer, nil] total count across all pages
+    # @param page [Integer, nil] current page number
+    # @param per_page [Integer, nil] items per page
+    # @param resource_class [Class] the resource class for items
     def initialize(data:, total: nil, page: nil, per_page: nil, resource_class:)
       @data = data
       @total = total
@@ -12,31 +45,53 @@ module DoorFlow
       @resource_class = resource_class
     end
 
+    # Iterate over each item in the list
+    # @yield [resource] each resource in the data array
+    # @return [Enumerator] if no block given
     def each(&block)
       @data.each(&block)
     end
 
+    # Access an item by index
+    # @param index [Integer] zero-based index
+    # @return [Resource, nil] resource at index, or nil
     def [](index)
       @data[index]
     end
 
+    # Number of items in current page
+    # @return [Integer] count of items
     def size
       @data.size
     end
 
+    # Check if the list is empty
+    # @return [Boolean] true if no items
     def empty?
       @data.empty?
     end
 
+    # Get the first item
+    # @return [Resource, nil] first resource or nil
     def first
       @data.first
     end
 
+    # Get the last item
+    # @return [Resource, nil] last resource or nil
     def last
       @data.last
     end
 
-    # Auto-pagination - fetch all pages automatically
+    # Automatically fetch and iterate over all pages
+    #
+    # This method will make additional API requests to fetch
+    # subsequent pages and yield each item across all pages.
+    #
+    # @yield [resource] each resource across all pages
+    # @example Iterate over all people across all pages
+    #   people = DoorFlow::Person.list(per_page: 100)
+    #   people.auto_paging_each { |person| process(person) }
     def auto_paging_each(&block)
       current_page = @page || 1
       current_data = @data
