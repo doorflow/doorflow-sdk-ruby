@@ -1,0 +1,11 @@
+--markup markdown
+--no-private
+--protected
+--output-dir doc
+--readme README.md
+--title "DoorFlow Ruby SDK Documentation"
+--exclude spec
+lib/**/*.rb
+-
+LICENSE
+CHANGELOG.md
