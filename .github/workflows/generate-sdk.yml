@@ -60,6 +60,14 @@ jobs:
 
           echo "✅ SDK generated successfully"
 
+      - name: Run post-generation enhancements
+        run: |
+          if [ -f bin/post-generate ]; then
+            ruby bin/post-generate
+          else
+            echo "⚠️  No post-generate script found, skipping"
+          fi
+
       - name: Setup Ruby
         uses: ruby/setup-ruby@v1
         with:
