@@ -21,3 +21,9 @@
 #docs/*.md
 # Then explicitly reverse the ignore rule for a single file:
 #!docs/README.md
+
+# Preserve hand-written idiomatic wrapper
+lib/doorflow/client.rb
+lib/doorflow/list_object.rb
+lib/doorflow/resource.rb
+lib/doorflow/resources/**
