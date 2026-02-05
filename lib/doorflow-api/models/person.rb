@@ -355,18 +355,7 @@ module DoorFlow
         invalid_properties.push('invalid value for "last_name", last_name cannot be nil.')
       end
 
-      if @enabled.nil?
-        invalid_properties.push('invalid value for "enabled", enabled cannot be nil.')
-      end
-
-      if @groups.nil?
-        invalid_properties.push('invalid value for "groups", groups cannot be nil.')
-      end
-
-      if @roles.nil?
-        invalid_properties.push('invalid value for "roles", roles cannot be nil.')
-      end
-
+      # enabled, groups, and roles can be nil in API responses
       invalid_properties
     end
 
@@ -377,9 +366,7 @@ module DoorFlow
       return false if @id.nil?
       return false if @first_name.nil?
       return false if @last_name.nil?
-      return false if @enabled.nil?
-      return false if @groups.nil?
-      return false if @roles.nil?
+      # enabled, groups, and roles can be nil
       true
     end
 
@@ -416,31 +403,22 @@ module DoorFlow
     # Custom attribute writer method with validation
     # @param [Object] enabled Value to be assigned
     def enabled=(enabled)
-      if enabled.nil?
-        fail ArgumentError, 'enabled cannot be nil'
-      end
-
+      # Allow nil - API may return people without enabled field set
       @enabled = enabled
     end
 
     # Custom attribute writer method with validation
     # @param [Object] groups Value to be assigned
     def groups=(groups)
-      if groups.nil?
-        fail ArgumentError, 'groups cannot be nil'
-      end
-
-      @groups = groups
+      # Allow nil - API may return people without groups
+      @groups = groups || []
     end
 
     # Custom attribute writer method with validation
     # @param [Object] roles Value to be assigned
     def roles=(roles)
-      if roles.nil?
-        fail ArgumentError, 'roles cannot be nil'
-      end
-
-      @roles = roles
+      # Allow nil - API may return people without roles
+      @roles = roles || []
     end
 
     # Checks equality by comparing each attribute.

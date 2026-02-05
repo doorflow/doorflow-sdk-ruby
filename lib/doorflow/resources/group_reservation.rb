@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Group Reservation resource for time-based group access
   #
   # Group reservations grant temporary access to entire groups for
@@ -44,10 +45,11 @@ module DoorFlow
     # Delete this group reservation
     # @return [Boolean] true if successful
     def delete
-      self.class.client.group_reservations_api.delete_group_reservation(@id)
+      _client.group_reservations_api.delete_group_reservation(@id)
       true
     rescue
       false
     end
+  end
   end
 end

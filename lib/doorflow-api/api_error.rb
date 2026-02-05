@@ -21,31 +21,36 @@ module DoorFlow
     #   ApiError.new(:code => 404, :message => "Not Found")
     def initialize(arg = nil)
       if arg.is_a? Hash
-        if arg.key?(:message) || arg.key?('message')
-          super(arg[:message] || arg['message'])
-        else
-          super arg
-        end
+        @message = arg[:message] || arg['message']
+        super(@message)
 
         arg.each do |k, v|
           instance_variable_set "@#{k}", v
         end
       else
-        super arg
         @message = arg
+        super(arg)
       end
     end
 
     # Override to_s to display a friendly error message
     def to_s
-      message
+      build_message
     end
 
     def message
+      build_message
+    end
+
+    private
+
+    def build_message
       if @message.nil?
         msg = "Error message: the server returns an error"
-      else
+      elsif @message.is_a?(String)
         msg = @message
+      else
+        msg = @message.to_s
       end
 
       msg += "\nHTTP status code: #{code}" if code

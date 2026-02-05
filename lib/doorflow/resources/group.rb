@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Group resource for managing access control groups
   #
   # Groups are collections of people who share common access permissions.
@@ -53,17 +54,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::Group] the updated group
     def update(params = {})
-      response = self.class.client.groups_api.update_group(@id, params)
+      response = _client.groups_api.update_group(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this group
     # @return [Boolean] true if successful
     def delete
-      self.class.client.groups_api.delete_group(@id)
+      _client.groups_api.delete_group(@id)
       true
     rescue
       false
     end
+  end
   end
 end

@@ -6,6 +6,15 @@ require 'doorflow/client'
 require 'doorflow/resource'
 require 'doorflow/list_object'
 
+# Typed errors
+require 'doorflow/errors'
+
+# Authentication
+require 'doorflow/auth'
+
+# Webhooks
+require 'doorflow/webhooks'
+
 # Resources
 require 'doorflow/resources/account'
 require 'doorflow/resources/channel'
@@ -25,10 +34,11 @@ require 'doorflow/resources/site'
 # This is the main entry point for the DoorFlow SDK. Configure your API
 # credentials here before making API calls.
 #
-# @example Basic configuration
+# @example Basic configuration with OAuth
 #   require 'doorflow'
 #
-#   DoorFlow.api_key = 'your_api_key_here'
+#   # After completing OAuth flow
+#   DoorFlow.access_token = auth.access_token
 #
 #   # Now you can use the SDK
 #   people = DoorFlow::Person.list
@@ -39,12 +49,12 @@ require 'doorflow/resources/site'
 #   )
 #
 # @example Configuration with custom API base
-#   DoorFlow.api_key = 'your_api_key'
+#   DoorFlow.access_token = auth.access_token
 #   DoorFlow.api_base = 'https://api.doorflow.com'
 #
 # @example Block-style configuration
 #   DoorFlow.configure do |config|
-#     config.access_token = 'your_api_key'
+#     config.access_token = auth.access_token
 #     config.scheme = 'https'
 #     config.host = 'api.doorflow.com'
 #   end
@@ -52,10 +62,10 @@ require 'doorflow/resources/site'
 # @see https://www.doorflow.com/docs DoorFlow API Documentation
 module DoorFlow
   class << self
-    # @!attribute [rw] api_key
-    #   Your DoorFlow API key for authentication
-    #   @return [String, nil] the API key
-    attr_accessor :api_key
+    # @!attribute [rw] access_token
+    #   Your DoorFlow OAuth access token for authentication
+    #   @return [String, nil] the access token
+    attr_accessor :access_token
 
     # @!attribute [rw] api_base
     #   Base URL for the DoorFlow API (defaults to https://api.doorflow.com)
@@ -67,17 +77,17 @@ module DoorFlow
     #   @return [String, nil] the API version
     attr_accessor :api_version
 
-    # Set the API key and configure the client
+    # Set the access token and configure the client
     #
     # This is the primary way to authenticate with the DoorFlow API.
     # Setting this will automatically configure the underlying HTTP client.
     #
-    # @param key [String] your DoorFlow API key
-    # @return [String] the API key
+    # @param token [String] your DoorFlow OAuth access token
+    # @return [String] the access token
     # @example
-    #   DoorFlow.api_key = 'sk_live_...'
-    def api_key=(key)
-      @api_key = key
+    #   DoorFlow.access_token = auth.access_token
+    def access_token=(token)
+      @access_token = token
       configure_client
     end
 
@@ -130,7 +140,7 @@ module DoorFlow
 
     def configure_client
       DoorFlow.configure do |config|
-        config.access_token = @api_key if @api_key
+        config.access_token = @access_token if @access_token
         if @api_base
           # Parse the URL to extract scheme and host
           uri = URI.parse(@api_base)
@@ -140,4 +150,22 @@ module DoorFlow
       end
     end
   end
+
+  # Resource aliases for Stripe-style API access
+  # Use DoorFlow::PersonResource.create instead of DoorFlow::Resources::Person.create
+  #
+  # NOTE: We use the "Resource" suffix to avoid conflicting with the generated
+  # API model classes (DoorFlow::Person, etc.) which are needed for deserialization.
+  PersonResource = Resources::Person
+  GroupResource = Resources::Group
+  CredentialResource = Resources::Credential
+  CredentialTypeResource = Resources::CredentialType
+  ChannelResource = Resources::Channel
+  SiteResource = Resources::Site
+  RoleResource = Resources::Role
+  EventResource = Resources::Event
+  ReservationResource = Resources::Reservation
+  GroupReservationResource = Resources::GroupReservation
+  NotificationRuleResource = Resources::NotificationRule
+  AccountResource = Resources::Account
 end

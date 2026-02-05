@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Site resource for managing physical locations
   #
   # Sites represent physical locations or buildings within an account.
@@ -48,17 +49,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::Site] the updated site
     def update(params = {})
-      response = self.class.client.sites_api.update_site(@id, params)
+      response = _client.sites_api.update_site(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this site
     # @return [Boolean] true if successful
     def delete
-      self.class.client.sites_api.delete_site(@id)
+      _client.sites_api.delete_site(@id)
       true
     rescue
       false
     end
+  end
   end
 end

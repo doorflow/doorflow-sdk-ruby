@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Role resource for managing access roles
   #
   # Roles define permissions and capabilities within DoorFlow,
@@ -48,17 +49,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::Role] the updated role
     def update(params = {})
-      response = self.class.client.roles_api.update_role(@id, params)
+      response = _client.roles_api.update_role(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this role
     # @return [Boolean] true if successful
     def delete
-      self.class.client.roles_api.delete_role(@id)
+      _client.roles_api.delete_role(@id)
       true
     rescue
       false
     end
+  end
   end
 end

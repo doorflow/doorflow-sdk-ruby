@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Person resource for managing people in DoorFlow
   #
   # People represent individuals who can access doors through the DoorFlow system.
@@ -25,9 +26,14 @@ module DoorFlow
     # @option params [String] :last_name Last name (required)
     # @option params [String] :email Email address
     # @option params [String] :phone Phone number
+    # @option params [String] :image_file Path to image file (auto-converted to data URI)
+    # @option params [String] :image_data Raw base64 image data (use with :image_mime_type)
+    # @option params [String] :image_mime_type MIME type for :image_data (default: image/png)
+    # @option params [String] :image_base64 Pre-formatted data URI (passed through unchanged)
     # @return [DoorFlow::Person]
     # @raise [DoorFlow::ApiError] if the API request fails
     def self.create(params = {})
+      params = prepare_image_params(params)
       response = client.people_api.create_person(params)
       from_api_model(response)
     end
@@ -46,11 +52,14 @@ module DoorFlow
     def self.list(params = {})
       response = client.people_api.list_people(params)
 
-      people = from_api_models(response.data || response)
+      # Handle both array response and object with data property
+      raw_data = response.respond_to?(:data) ? response.data : response
+      raw_data = [raw_data] unless raw_data.is_a?(Array)
+      people = from_api_models(raw_data)
 
       ListObject.new(
         data: people,
-        total: response.respond_to?(:total) ? response.total : nil,
+        total: response.respond_to?(:total) ? response.total : people.size,
         page: params[:page],
         per_page: params[:per_page],
         resource_class: self
@@ -59,16 +68,21 @@ module DoorFlow
 
     # Update the person
     # @param params [Hash] Attributes to update
+    # @option params [String] :image_file Path to image file (auto-converted to data URI)
+    # @option params [String] :image_data Raw base64 image data (use with :image_mime_type)
+    # @option params [String] :image_mime_type MIME type for :image_data (default: image/png)
+    # @option params [String] :image_base64 Pre-formatted data URI (passed through unchanged)
     # @return [DoorFlow::Person]
     def update(params = {})
-      response = self.class.client.people_api.update_person(@id, params)
+      params = self.class.prepare_image_params(params)
+      response = _client.people_api.update_person(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete the person
     # @return [Boolean]
     def delete
-      self.class.client.people_api.delete_person(@id)
+      _client.people_api.delete_person(@id)
       true
     rescue => e
       false
@@ -83,5 +97,6 @@ module DoorFlow
     rescue => e
       false
     end
+  end
   end
 end

@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Account resource for managing DoorFlow accounts
   #
   # Accounts are the top-level organization in DoorFlow,
@@ -48,17 +49,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::Account] the updated account
     def update(params = {})
-      response = self.class.client.accounts_api.update_account(@id, params)
+      response = _client.accounts_api.update_account(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this account
     # @return [Boolean] true if successful
     def delete
-      self.class.client.accounts_api.delete_account(@id)
+      _client.accounts_api.delete_account(@id)
       true
     rescue
       false
     end
+  end
   end
 end

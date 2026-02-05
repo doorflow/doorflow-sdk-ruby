@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Credential Type resource for managing credential formats
   #
   # Credential types define the formats and specifications for
@@ -24,5 +25,6 @@ module DoorFlow
         resource_class: self
       )
     end
+  end
   end
 end

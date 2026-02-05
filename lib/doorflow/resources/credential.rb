@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Credential resource for managing access credentials
   #
   # Credentials are physical or digital tokens that grant access,
@@ -55,17 +56,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::Credential] the updated credential
     def update(params = {})
-      response = self.class.client.credentials_api.update_credential(@id, params)
+      response = _client.credentials_api.update_credential(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this credential
     # @return [Boolean] true if successful
     def delete
-      self.class.client.credentials_api.delete_credential(@id)
+      _client.credentials_api.delete_credential(@id)
       true
     rescue
       false
     end
+  end
   end
 end

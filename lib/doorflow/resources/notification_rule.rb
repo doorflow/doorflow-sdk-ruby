@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Notification Rule resource for managing event notifications
   #
   # Notification rules define automated alerts and webhooks triggered
@@ -53,17 +54,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::NotificationRule] the updated notification rule
     def update(params = {})
-      response = self.class.client.notification_rules_api.update_notification_rule(@id, params)
+      response = _client.notification_rules_api.update_notification_rule(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this notification rule
     # @return [Boolean] true if successful
     def delete
-      self.class.client.notification_rules_api.delete_notification_rule(@id)
+      _client.notification_rules_api.delete_notification_rule(@id)
       true
     rescue
       false
     end
+  end
   end
 end

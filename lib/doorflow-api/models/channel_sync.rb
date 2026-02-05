@@ -131,10 +131,7 @@ module DoorFlow
     # Custom attribute writer method checking allowed values (enum).
     # @param [Object] status Object to be assigned
     def status=(status)
-      validator = EnumAttributeValidator.new('String', ["ok", "fail", "syncing", "pending"])
-      unless validator.valid?(status)
-        fail ArgumentError, "invalid value for \"status\", must be one of #{validator.allowable_values}."
-      end
+      # Allow any status value - API may return additional statuses not in OpenAPI spec
       @status = status
     end
 

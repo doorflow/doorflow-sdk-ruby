@@ -37,12 +37,14 @@ module DoorFlow
     # @param page [Integer, nil] current page number
     # @param per_page [Integer, nil] items per page
     # @param resource_class [Class] the resource class for items
-    def initialize(data:, total: nil, page: nil, per_page: nil, resource_class:)
+    # @param client [DoorFlow::Client, nil] client instance for auto-paging
+    def initialize(data:, total: nil, page: nil, per_page: nil, resource_class:, client: nil)
       @data = data
       @total = total
       @page = page
       @per_page = per_page
       @resource_class = resource_class
+      @client = client
     end
 
     # Iterate over each item in the list

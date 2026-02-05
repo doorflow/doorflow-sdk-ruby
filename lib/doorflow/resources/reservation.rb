@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Reservation resource for managing time-based access
   #
   # Reservations grant temporary access to specific people for
@@ -54,17 +55,18 @@ module DoorFlow
     # @param params [Hash] attributes to update
     # @return [DoorFlow::Reservation] the updated reservation
     def update(params = {})
-      response = self.class.client.reservations_api.update_reservation(@id, params)
+      response = _client.reservations_api.update_reservation(@id, params)
       self.class.from_api_model(response)
     end
 
     # Delete this reservation
     # @return [Boolean] true if successful
     def delete
-      self.class.client.reservations_api.delete_reservation(@id)
+      _client.reservations_api.delete_reservation(@id)
       true
     rescue
       false
     end
+  end
   end
 end

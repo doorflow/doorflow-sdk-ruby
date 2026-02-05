@@ -1,15 +1,15 @@
 require 'spec_helper'
 
 RSpec.describe DoorFlow do
-  describe '.api_key=' do
-    it 'sets the API key' do
-      DoorFlow.api_key = 'test_key'
-      expect(DoorFlow.api_key).to eq('test_key')
+  describe '.access_token=' do
+    it 'sets the access token' do
+      DoorFlow.access_token = 'test_token'
+      expect(DoorFlow.access_token).to eq('test_token')
     end
 
     it 'configures the generated client' do
-      DoorFlow.api_key = 'test_key'
-      expect(DoorFlow.configuration.access_token).to eq('test_key')
+      DoorFlow.access_token = 'test_token'
+      expect(DoorFlow.configuration.access_token).to eq('test_token')
     end
   end
 

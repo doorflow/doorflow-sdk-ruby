@@ -1,4 +1,5 @@
 module DoorFlow
+  module Resources
   # Event resource for accessing access control events
   #
   # Events are immutable records of all access activity including
@@ -41,5 +42,6 @@ module DoorFlow
         resource_class: self
       )
     end
+  end
   end
 end
