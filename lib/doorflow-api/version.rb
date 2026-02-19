@@ -11,5 +11,5 @@ Generator version: 7.18.0-SNAPSHOT
 =end
 
 module DoorFlow
-  VERSION = '1.0.0'
+  VERSION = '1.0.1'
 end

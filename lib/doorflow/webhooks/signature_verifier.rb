@@ -20,8 +20,8 @@ module DoorFlow
     # @example Verifying a webhook
     #   events = DoorFlow::Webhooks::SignatureVerifier.verify(
     #     payload: request.raw_post,
-    #     signature: request.headers['X-DoorFlow-Signature'],
-    #     timestamp: request.headers['X-DoorFlow-Timestamp'],
+    #     signature: request.headers['Signature'],
+    #     timestamp: request.headers['Timestamp'],
     #     secret: ENV['DOORFLOW_WEBHOOK_SECRET']
     #   )
     #
@@ -36,8 +36,8 @@ module DoorFlow
         # Verify webhook signature and parse events
         #
         # @param payload [String] Raw request body
-        # @param signature [String] X-DoorFlow-Signature header value
-        # @param timestamp [String] X-DoorFlow-Timestamp header value
+        # @param signature [String] Signature header value
+        # @param timestamp [String] Timestamp header value
         # @param secret [String] Webhook secret from DoorFlow dashboard
         # @param tolerance [Integer] Maximum age in seconds (0 to disable)
         # @return [Array<Event>] Parsed webhook events
@@ -109,7 +109,10 @@ module DoorFlow
 
         def parse_events(payload)
           data = JSON.parse(payload, symbolize_names: true)
-          events = data[:events] || []
+          events = case data
+                   when Array then data
+                   else data[:events] || [data]
+                   end
           events.map { |e| Event.new(e) }
         rescue JSON::ParserError => e
           raise SignatureError.new("Invalid JSON payload: #{e.message}")

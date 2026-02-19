@@ -52,7 +52,7 @@ module DoorFlow
       # Format error for display
       # @return [String]
       def to_s
-        parts = [message]
+        parts = [super]
         parts << "HTTP #{status}" if status
         parts << "Code: #{code}" if code
         parts << "Request ID: #{request_id}" if request_id

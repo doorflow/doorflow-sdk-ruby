@@ -27,8 +27,8 @@ module DoorFlow
     #   # In your controller:
     #   handler.handle(
     #     payload: request.raw_post,
-    #     signature: request.headers['X-DoorFlow-Signature'],
-    #     timestamp: request.headers['X-DoorFlow-Timestamp']
+    #     signature: request.headers['Signature'],
+    #     timestamp: request.headers['Timestamp']
     #   )
     #
     # @example With auto-fetch
@@ -82,8 +82,8 @@ module DoorFlow
       # Process an incoming webhook request
       #
       # @param payload [String] Raw request body
-      # @param signature [String] X-DoorFlow-Signature header
-      # @param timestamp [String] X-DoorFlow-Timestamp header
+      # @param signature [String] Signature header
+      # @param timestamp [String] Timestamp header
       # @return [Array<Event>] Processed events
       # @raise [SignatureError] If signature verification fails
       def handle(payload:, signature:, timestamp:)
@@ -108,8 +108,8 @@ module DoorFlow
       def handle_request(request)
         handle(
           payload: extract_body(request),
-          signature: extract_header(request, 'X-DoorFlow-Signature'),
-          timestamp: extract_header(request, 'X-DoorFlow-Timestamp')
+          signature: extract_header(request, 'Signature'),
+          timestamp: extract_header(request, 'Timestamp')
         )
       end
 

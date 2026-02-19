@@ -285,8 +285,8 @@ class WebhooksController < ApplicationController
   def create
     handler.handle(
       payload: request.raw_post,
-      signature: request.headers['X-DoorFlow-Signature'],
-      timestamp: request.headers['X-DoorFlow-Timestamp']
+      signature: request.headers['Signature'],
+      timestamp: request.headers['Timestamp']
     )
     head :ok
   rescue DoorFlow::Webhooks::SignatureError
