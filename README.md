@@ -16,13 +16,13 @@ Ruby 3.2 or later.
 Install the gem with:
 
 ```bash
-gem install doorflow-api
+gem install doorflow
 ```
 
 Or add to your Gemfile:
 
 ```ruby
-gem 'doorflow-api'
+gem 'doorflow'
 ```
 
 ## Usage
