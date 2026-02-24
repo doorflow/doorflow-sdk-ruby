@@ -27,10 +27,11 @@ module DoorFlow
     end
 
     # Retrieve a credential by ID
+    # @param person_id [Integer] person ID (required by the API)
     # @param id [String] credential ID
     # @return [DoorFlow::Credential] the credential
-    def self.retrieve(id)
-      response = client.credentials_api.get_credential(id)
+    def self.retrieve(person_id, id)
+      response = client.credentials_api.get_credential(person_id, id)
       from_api_model(response)
     end
 
@@ -63,7 +64,7 @@ module DoorFlow
     # Delete this credential
     # @return [Boolean] true if successful
     def delete
-      _client.credentials_api.delete_credential(@id)
+      _client.credentials_api.delete_credential(@person_id, @id)
       true
     rescue
       false
