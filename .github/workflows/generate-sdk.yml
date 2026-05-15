@@ -5,10 +5,10 @@ on:
     types: [spec-updated]
   workflow_dispatch:
     inputs:
-      spec_url:
-        description: 'OpenAPI spec URL'
+      spec_ref:
+        description: 'doorguard branch, tag, or commit SHA to fetch openapi.yaml from'
         required: false
-        default: 'https://raw.githubusercontent.com/netnodes/doorguard/master/openapi.yaml'
+        default: 'master'
 
 jobs:
   generate:
@@ -19,19 +19,25 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Fetch OpenAPI spec
-        run: |
-          SPEC_URL="${{ github.event.client_payload.spec_url || inputs.spec_url || 'https://raw.githubusercontent.com/netnodes/doorguard/master/openapi.yaml' }}"
-          echo "Fetching spec from: $SPEC_URL"
-          curl -fsSL "$SPEC_URL" -o openapi.yaml
+      - name: Fetch OpenAPI spec from doorguard
+        uses: actions/checkout@v4
+        with:
+          repository: netnodes/doorguard
+          ref: ${{ github.event.client_payload.commit_sha || inputs.spec_ref || 'master' }}
+          token: ${{ secrets.DOORGUARD_READ_TOKEN }}
+          path: .doorguard
+          sparse-checkout: openapi.yaml
+          sparse-checkout-cone-mode: false
 
-          # Validate spec downloaded
+      - name: Stage OpenAPI spec
+        run: |
+          cp .doorguard/openapi.yaml openapi.yaml
+          rm -rf .doorguard
           if [ ! -s openapi.yaml ]; then
-            echo "Error: Failed to download OpenAPI spec"
+            echo "Error: openapi.yaml not present after checkout"
             exit 1
           fi
-
-          echo "✅ OpenAPI spec downloaded successfully"
+          echo "✅ OpenAPI spec staged from netnodes/doorguard"
 
       - name: Read current version
         id: version
@@ -118,7 +124,7 @@ jobs:
 
             ### Source Information
             - **Commit SHA**: `${{ github.event.client_payload.commit_sha || 'unknown' }}`
-            - **Spec URL**: ${{ github.event.client_payload.spec_url || inputs.spec_url || 'master' }}
+            - **Source ref**: ${{ github.event.client_payload.commit_sha || inputs.spec_ref || 'master' }}
             - **Triggered by**: ${{ github.event.client_payload.pusher_name || github.actor }}
 
             ### Changes in doorguard
@@ -155,4 +161,4 @@ jobs:
           echo "- **Version**: ${{ steps.version.outputs.current }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Changes**: ${{ steps.changes.outputs.has_changes }}" >> $GITHUB_STEP_SUMMARY
           echo "- **Tests**: ${{ steps.tests.outcome }}" >> $GITHUB_STEP_SUMMARY
-          echo "- **Spec Source**: ${{ github.event.client_payload.spec_url || inputs.spec_url || 'master' }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Source ref**: ${{ github.event.client_payload.commit_sha || inputs.spec_ref || 'master' }}" >> $GITHUB_STEP_SUMMARY
