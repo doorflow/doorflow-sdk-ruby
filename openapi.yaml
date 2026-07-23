@@ -606,6 +606,167 @@ paths:
           "$ref": "#/components/responses/NotFoundError"
         '500':
           "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_designs":
+    get:
+      summary: List card designs
+      description: Returns all card designs for the authenticated user's account.
+      operationId: listCardDesigns
+      tags:
+      - card_designs
+      security:
+      - OAuth2:
+        - account.card_design.readonly
+      responses:
+        '200':
+          description: List of card designs retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CardDesign"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create card design
+      description: Creates a new card design. Images can be provided as base64-encoded strings.
+      operationId: createCardDesign
+      tags:
+      - card_designs
+      security:
+      - OAuth2:
+        - account.card_design
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CardDesignInput"
+      responses:
+        '201':
+          description: Card design created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardDesign"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_designs/{id}":
+    get:
+      summary: Get card design
+      description: Returns details for a specific card design including image URLs at multiple sizes.
+      operationId: getCardDesign
+      tags:
+      - card_designs
+      security:
+      - OAuth2:
+        - account.card_design.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Card Design ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Card design retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardDesign"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    put:
+      summary: Update card design
+      description: Updates an existing card design. Images can be replaced by providing new base64-encoded strings.
+      operationId: updateCardDesign
+      tags:
+      - card_designs
+      security:
+      - OAuth2:
+        - account.card_design
+      parameters:
+      - name: id
+        in: path
+        description: Card Design ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CardDesignInput"
+      responses:
+        '200':
+          description: Card design updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardDesign"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete card design
+      description: Permanently deletes a card design and its associated images.
+      operationId: deleteCardDesign
+      tags:
+      - card_designs
+      security:
+      - OAuth2:
+        - account.card_design
+      parameters:
+      - name: id
+        in: path
+        description: Card Design ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Card design deleted successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  result:
+                    type: string
+                    example: ok
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
   "/api/3/credential_types":
     get:
       summary: List credential types
@@ -1166,7 +1327,7 @@ paths:
       - group_reservations
       security:
       - OAuth2:
-        - account.group_reservation.readonly
+        - account.person.readonly
       parameters:
       - name: since
         in: query
@@ -1237,7 +1398,7 @@ paths:
       - group_reservations
       security:
       - OAuth2:
-        - account.group_reservation
+        - account.person
       requestBody:
         required: true
         content:
@@ -1260,6 +1421,38 @@ paths:
         '500':
           "$ref": "#/components/responses/InternalServerError"
   "/api/3/group_reservations/{id}":
+    get:
+      summary: Get group reservation
+      description: |
+        Returns a single group reservation by ID.
+      operationId: getGroupReservation
+      tags:
+      - group_reservations
+      security:
+      - OAuth2:
+        - account.person.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Group reservation ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Group reservation retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/GroupReservation"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
     delete:
       summary: Delete group reservation
       description: |
@@ -1271,7 +1464,7 @@ paths:
       - group_reservations
       security:
       - OAuth2:
-        - account.group_reservation
+        - account.person
       parameters:
       - name: id
         in: path
@@ -1298,6 +1491,55 @@ paths:
           "$ref": "#/components/responses/NotFoundError"
         '422':
           "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/element_sessions":
+    post:
+      summary: Create an Elements widget session
+      description: |
+        Mints a short-lived JWT session token authorising one Elements widget
+        instance for one identified subject. The token is delivered to the
+        widget shell via the host page or app, then forwarded to DoorFlow.
+        Tokens expire after 15 minutes; long-lived widgets refresh by
+        calling this endpoint again from the host backend.
+
+        The `member` block is the integrator's CRM-side identity for the
+        person; DoorFlow find-or-creates a `Person` against `external_id`
+        on the authenticated account.
+      operationId: createElementSession
+      tags:
+        - element_sessions
+      security:
+        - OAuth2: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/ElementSessionInput"
+      responses:
+        '200':
+          description: Session token minted successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ElementSession"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          description: Session could not be minted — typed error in the response body
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ElementSessionError"
+        '503':
+          description: Identity-assertion verification could not complete because the partner JWKS endpoint was unreachable
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/ElementSessionError"
         '500':
           "$ref": "#/components/responses/InternalServerError"
   "/api/3/groups":
@@ -1868,22 +2110,18 @@ paths:
                 properties:
                   resource_owner_id:
                     type: integer
-                    description: ID of the user (resource owner) who authorized this
-                      token
+                    description: ID of the user (resource owner) who authorized this token
                     example: 12345
                   account_id:
                     type: string
-                    description: Hashid of the account associated with the resource
-                      owner
+                    description: Hashid of the account associated with the resource owner
                     example: abc123xyz
                   scope:
                     type: array
                     items:
                       type: string
                     description: Array of OAuth scopes granted to this token
-                    example:
-                    - account.person.readonly
-                    - account.channel.readonly
+                    example: ["account.person.readonly", "account.channel.readonly"]
                   expires_in:
                     type: integer
                     description: Number of seconds until the token expires
@@ -1894,7 +2132,7 @@ paths:
                       uid:
                         type: string
                         description: Unique identifier of the OAuth application
-                        example: abc123def456
+                        example: "abc123def456"
                   created_at:
                     type: integer
                     description: Unix timestamp when the token was created
@@ -2367,6 +2605,639 @@ paths:
           "$ref": "#/components/responses/ForbiddenError"
         '500':
           "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_templates":
+    get:
+      summary: List card templates
+      description: |
+        Returns a paginated list of card templates for the authenticated account.
+        Soft-deleted templates (deleted_at is not null) are excluded by default;
+        pass include_deleted=true to include them.
+      operationId: listCardTemplates
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template.readonly
+      parameters:
+      - name: page
+        in: query
+        description: Page number
+        required: false
+        schema:
+          type: integer
+          default: 1
+      - name: per_page
+        in: query
+        description: Results per page
+        required: false
+        schema:
+          type: integer
+          default: 50
+      - name: updated_since
+        in: query
+        description: ISO 8601 timestamp. Returns only records updated after this time
+        required: false
+        schema:
+          type: string
+          format: date-time
+      - name: include_deleted
+        in: query
+        description: |
+          When true, soft-deleted templates are included in the response.
+          Defaults to false.
+        required: false
+        schema:
+          type: boolean
+          default: false
+      responses:
+        '200':
+          description: List of card templates retrieved successfully
+          headers:
+            X-Current-Page:
+              schema:
+                type: integer
+              description: Current page number
+            X-Per-Page:
+              schema:
+                type: integer
+              description: Records per page
+            X-Total-Results:
+              schema:
+                type: integer
+              description: Total number of records
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CardTemplate"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create card template
+      description: |
+        Creates a new card template. The client should submit a locally generated uuid.
+        The server preserves this and returns the server-assigned id.
+      operationId: createCardTemplate
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CardTemplateInput"
+      responses:
+        '201':
+          description: Card template created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplate"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_templates/{id}":
+    get:
+      summary: Get card template
+      description: Returns a single card template by ID including all template elements.
+      operationId: getCardTemplate
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: Card template retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplate"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    put:
+      summary: Update card template
+      description: |
+        Updates an existing card template. Submitting template_objects replaces
+        the entire objects array.
+
+        Three special update modes are recognised:
+        - **Soft-delete**: PATCH `deleted_at` to a non-null timestamp to
+          soft-delete (or null to restore). The server records `deleted_by_id`
+          from the authenticated user. Soft-delete is permitted for any admin
+          in the account, regardless of `editable_by` or `owner_id`.
+        - **Owner transfer**: PATCH `owner_id` to reassign ownership. Permitted
+          for the current owner or any admin in the account. The new value must
+          be the ID of an admin in the same account.
+        - **Content edits** (any other writable field): respect the existing
+          `editable_by` rule; if `editable_by` is `owner_only`, only the
+          current owner may edit.
+      operationId: updateCardTemplate
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CardTemplateInput"
+      responses:
+        '200':
+          description: Card template updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplate"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete card template (hard-delete)
+      description: |
+        Permanently deletes a card template and all associated template
+        elements and background images. The record is removed from the
+        database and cannot be restored. Permitted for any admin in the
+        account.
+
+        For a recoverable delete, PATCH `deleted_at` instead.
+      operationId: deleteCardTemplate
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '204':
+          description: Card template deleted successfully
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_templates/{id}/background_image/{side}":
+    get:
+      summary: Get background image
+      description: Returns the background image for the specified side. Redirects to the image URL.
+      operationId: getCardTemplateBackgroundImage
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      - name: side
+        in: path
+        description: Which side of the card
+        required: true
+        schema:
+          type: string
+          enum:
+          - front
+          - back
+      responses:
+        '302':
+          description: Redirect to image URL
+        '404':
+          description: Template or image not found
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+    put:
+      summary: Upload background image
+      description: Uploads or replaces the background image for the specified side.
+      operationId: updateCardTemplateBackgroundImage
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      - name: side
+        in: path
+        description: Which side of the card
+        required: true
+        schema:
+          type: string
+          enum:
+          - front
+          - back
+      requestBody:
+        required: true
+        content:
+          image/png:
+            schema:
+              type: string
+              format: binary
+          image/jpeg:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: Background image uploaded successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplate"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+    delete:
+      summary: Delete background image
+      description: Removes the background image for the specified side.
+      operationId: deleteCardTemplateBackgroundImage
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      - name: side
+        in: path
+        description: Which side of the card
+        required: true
+        schema:
+          type: string
+          enum:
+          - front
+          - back
+      responses:
+        '204':
+          description: Background image deleted successfully
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+  "/api/3/card_templates/{id}/files":
+    get:
+      summary: List linked files
+      description: Returns all files linked to a card template.
+      operationId: listCardTemplateFiles
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template.readonly
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      responses:
+        '200':
+          description: List of linked files retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/LinkedFile"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_templates/{id}/files/{file_uuid}":
+    put:
+      summary: Upload or replace linked file
+      description: Uploads or replaces a linked file for a card template. The file_role query parameter is required.
+      operationId: uploadCardTemplateFile
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      - name: file_uuid
+        in: path
+        description: UUID of the linked file
+        required: true
+        schema:
+          type: string
+      - name: file_role
+        in: query
+        description: Role of the file (e.g. background_front, background_back, logo)
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/octet-stream:
+            schema:
+              type: string
+              format: binary
+      responses:
+        '200':
+          description: File uploaded successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/LinkedFile"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete linked file
+      description: Removes a linked file from a card template.
+      operationId: deleteCardTemplateFile
+      tags:
+      - card_templates
+      security:
+      - OAuth2:
+        - private.account.card_template
+      parameters:
+      - name: id
+        in: path
+        description: Card template ID
+        required: true
+        schema:
+          type: integer
+      - name: file_uuid
+        in: path
+        description: UUID of the linked file
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Linked file deleted successfully
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_template_types":
+    get:
+      summary: List card template types
+      description: Returns all available card template types. This endpoint is not paginated.
+      operationId: listCardTemplateTypes
+      tags:
+      - card_template_types
+      security:
+      - OAuth2:
+        - private.card_template_type.readonly
+      parameters:
+      - name: updated_since
+        in: query
+        description: ISO 8601 timestamp. Returns only types updated after this time
+        required: false
+        schema:
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: List of card template types retrieved successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  "$ref": "#/components/schemas/CardTemplateType"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    post:
+      summary: Create card template type
+      description: Creates a new card template type. The code field must be unique.
+      operationId: createCardTemplateType
+      tags:
+      - card_template_types
+      security:
+      - OAuth2:
+        - private.card_template_type
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CardTemplateTypeInput"
+      responses:
+        '201':
+          description: Card template type created successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplateType"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+  "/api/3/card_template_types/{code}":
+    get:
+      summary: Get card template type
+      description: Returns a single card template type by its code.
+      operationId: getCardTemplateType
+      tags:
+      - card_template_types
+      security:
+      - OAuth2:
+        - private.card_template_type.readonly
+      parameters:
+      - name: code
+        in: path
+        description: Card template type code
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Card template type retrieved successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplateType"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    put:
+      summary: Update card template type
+      description: Updates an existing card template type. Submitting non_printable_zones replaces the entire zones array.
+      operationId: updateCardTemplateType
+      tags:
+      - card_template_types
+      security:
+      - OAuth2:
+        - private.card_template_type
+      parameters:
+      - name: code
+        in: path
+        description: Card template type code
+        required: true
+        schema:
+          type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              "$ref": "#/components/schemas/CardTemplateTypeInput"
+      responses:
+        '200':
+          description: Card template type updated successfully
+          content:
+            application/json:
+              schema:
+                "$ref": "#/components/schemas/CardTemplateType"
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '422':
+          "$ref": "#/components/responses/UnprocessableEntityError"
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
+    delete:
+      summary: Delete card template type
+      description: Deletes a card template type. Fails with 409 Conflict if any card templates reference this type.
+      operationId: deleteCardTemplateType
+      tags:
+      - card_template_types
+      security:
+      - OAuth2:
+        - private.card_template_type
+      parameters:
+      - name: code
+        in: path
+        description: Card template type code
+        required: true
+        schema:
+          type: string
+      responses:
+        '204':
+          description: Card template type deleted successfully
+        '401':
+          "$ref": "#/components/responses/UnauthorizedError"
+        '403':
+          "$ref": "#/components/responses/ForbiddenError"
+        '404':
+          "$ref": "#/components/responses/NotFoundError"
+        '409':
+          description: Card template type is in use by one or more card templates
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: Card template type is in use by one or more card templates
+        '500':
+          "$ref": "#/components/responses/InternalServerError"
   "/api/3/sync":
     post:
       summary: Initiate sync
@@ -2761,6 +3632,86 @@ components:
             name:
               type: string
               description: Shift name
+    CardDesign:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: integer
+          description: Unique identifier for the card design
+          example: 42
+        name:
+          type: string
+          description: Name of the card design
+          example: Standard Blue Card
+        notes:
+          type: string
+          nullable: true
+          description: Free-text notes about the card design
+          example: Used for full-time employees
+        image_front:
+          type: object
+          nullable: true
+          description: Front image URLs at multiple sizes, or null if no image is set
+          properties:
+            original:
+              type: string
+              description: Original uploaded image URL
+            medium:
+              type: string
+              description: Medium size (600x378) image URL
+            small:
+              type: string
+              description: Small size (300x189) image URL
+            thumb:
+              type: string
+              description: Thumbnail size (150x94) image URL
+        image_back:
+          type: object
+          nullable: true
+          description: Back image URLs at multiple sizes, or null if no image is set
+          properties:
+            original:
+              type: string
+              description: Original uploaded image URL
+            medium:
+              type: string
+              description: Medium size (600x378) image URL
+            small:
+              type: string
+              description: Small size (300x189) image URL
+            thumb:
+              type: string
+              description: Thumbnail size (100x94) image URL
+        created_at:
+          type: string
+          format: date-time
+          description: Timestamp of creation
+        updated_at:
+          type: string
+          format: date-time
+          description: Timestamp of last update
+    CardDesignInput:
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the card design (required for creation)
+          example: Standard Blue Card
+        notes:
+          type: string
+          nullable: true
+          description: Free-text notes about the card design
+        image_front_base64:
+          type: string
+          nullable: true
+          description: Base64-encoded image data for the front of the card (data URI format, e.g. data:image/png;base64,...)
+        image_back_base64:
+          type: string
+          nullable: true
+          description: Base64-encoded image data for the back of the card (data URI format, e.g. data:image/png;base64,...)
     CredentialType:
       type: object
       required:
@@ -2821,13 +3772,14 @@ components:
         status:
           type: string
           nullable: true
-          description: Status for mobile credentials (HID Mobile Access)
+          description: Status for mobile credentials
           enum:
           - invited
           - active
           - revoking
           - revoked
-          example: active
+          - added_to_wallet
+          example: invited
         url:
           type: string
           nullable: true
@@ -3057,6 +4009,138 @@ components:
               - 1
               - 3
               - 5
+    ElementSessionInput:
+      type: object
+      required:
+        - widget_type
+        - member
+      properties:
+        widget_type:
+          type: string
+          enum: [admin, member]
+          description: |
+            Which widget kind this session authorises. `admin` exposes
+            credential issue/revoke and group management; `member` exposes
+            wallet provisioning and self-deactivation.
+          example: member
+        member:
+          "$ref": "#/components/schemas/ElementSessionMember"
+        identity_assertion:
+          type: string
+          nullable: true
+          description: |
+            Optional partner-signed JWT (RFC 7521 / RFC 7523) carrying
+            verified-identity claims. When present and verified against
+            the partner's published JWKS, downstream wallet provisioning
+            may skip its own SMS verification step.
+        platform:
+          type: string
+          enum: [apple, google]
+          nullable: true
+          description: |
+            Optional platform hint. Only honoured by the iOS-side
+            `/sdk/button` host page; ignored by the JS shell.
+        config:
+          "$ref": "#/components/schemas/ElementSessionConfig"
+        credentials:
+          type: array
+          nullable: true
+          description: |
+            Optional explicit credential-type slugs (or well-known aliases)
+            to expose in the widget. Defaults to all wallet-eligible types
+            for the requested widget kind.
+          items:
+            type: string
+          example: ["mobile_access", "pin"]
+    ElementSessionMember:
+      type: object
+      required:
+        - external_id
+      properties:
+        external_id:
+          type: string
+          description: |
+            The integrator's CRM-side identifier for the person. DoorFlow
+            stores this on `Person.organisation_id` and uses it for
+            find-or-create on subsequent calls.
+          example: "u_42"
+        name:
+          type: string
+          description: Person's full name. Used when creating a new Person record.
+          example: "Alice Smith"
+        email:
+          type: string
+          format: email
+          nullable: true
+          description: Person's email. Used when creating a new Person and to claim an existing unlinked Person with the same email.
+          example: "alice@example.com"
+    ElementSessionConfig:
+      type: object
+      additionalProperties: false
+      description: |
+        Theme and widget-configuration flags. Each value is validated
+        on the server; invalid values fall back to defaults rather than
+        rejecting the session.
+      properties:
+        theme:
+          type: string
+          enum: [light, dark, auto]
+          default: light
+        accent_color:
+          type: string
+          description: 3- or 6-digit hex (e.g. `#FF6600`).
+          example: "#FF6600"
+        border_radius:
+          type: integer
+          minimum: 0
+          maximum: 64
+          default: 8
+        font_family:
+          type: string
+          description: |
+            CSS font-family stack. Restricted to letters, digits, hyphens,
+            spaces, commas, and single quotes.
+          example: "Inter, -apple-system, sans-serif"
+        manage_groups:
+          type: boolean
+          default: true
+        show_member:
+          type: boolean
+          default: true
+    ElementSession:
+      type: object
+      required:
+        - token
+        - expires_in
+      properties:
+        token:
+          type: string
+          description: Short-lived JWT to forward to the widget shell.
+          example: "eyJhbGciOiJIUzI1NiJ9..."
+        expires_in:
+          type: integer
+          description: Seconds until the token expires.
+          example: 900
+    ElementSessionError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          enum:
+            - no_eligible_credentials
+            - assertion_replayed
+            - assertion_expired
+            - assertion_subject_mismatch
+            - assertion_signature_invalid
+            - jwks_unavailable
+          description: |
+            Typed error code so SDK callers can branch without parsing
+            the human-readable message.
+        message:
+          type: string
+          description: Human-readable description of the error.
     Group:
       type: object
       required:
@@ -3628,6 +4712,341 @@ components:
                 type: string
                 description: IP address or CIDR range
                 example: 192.168.1.0/24
+    CardTemplate:
+      type: object
+      required:
+      - id
+      - uuid
+      - name
+      - template_type_code
+      properties:
+        id:
+          type: integer
+          description: Server-assigned identifier
+          example: 42
+        uuid:
+          type: string
+          description: Client-generated UUID (RFC 4122)
+          example: 550E8400-E29B-41D4-A716-446655440000
+        name:
+          type: string
+          description: Template display name, unique per account
+          example: Staff Card
+        template_type_code:
+          type: string
+          description: References a template type code
+          example: ISO_CARD
+        card_type:
+          type: string
+          description: Card finish/format
+          enum:
+          - standard
+          - signature_stripe
+          example: standard
+        double_sided:
+          type: boolean
+          description: Whether the card has a reverse side
+          example: true
+        orientation_front:
+          type: string
+          description: "P = Portrait, L = Landscape"
+          enum:
+          - P
+          - L
+          example: P
+        orientation_back:
+          type: string
+          description: "P = Portrait, L = Landscape"
+          enum:
+          - P
+          - L
+          example: L
+        default_template:
+          type: boolean
+          description: Whether this is the account default template
+          example: false
+        background_image_front_url:
+          type: string
+          nullable: true
+          description: URL to the front background image, or null if not set
+        background_image_back_url:
+          type: string
+          nullable: true
+          description: URL to the back background image, or null if not set
+        template_objects:
+          type: array
+          description: Free-form JSONB objects representing layout elements on this template
+          items:
+            type: object
+        owner_id:
+          type: integer
+          nullable: true
+          description: |
+            ID of the user who owns this template, or null if unowned. Set
+            server-side on create. May be reassigned via PATCH by the current
+            owner or by any admin in the account; the new value must be the
+            ID of an admin in the same account.
+        editable_by:
+          type: string
+          enum:
+          - owner_only
+          - any_admin
+          description: Who can edit this template
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: |
+            Soft-delete timestamp. Null for live templates. Writable via PATCH:
+            sending a non-null value soft-deletes the template; sending null
+            restores it. Soft-deleted templates are excluded from index by
+            default (see include_deleted).
+        deleted_by_id:
+          type: integer
+          nullable: true
+          readOnly: true
+          description: |
+            ID of the user who soft-deleted this template, set server-side
+            from the authenticated user when deleted_at is written. Cleared
+            when deleted_at is cleared.
+        linked_files:
+          type: array
+          description: Files linked to this template (images, fonts, etc.)
+          items:
+            "$ref": "#/components/schemas/LinkedFile"
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp.
+        updated_at:
+          type: string
+          format: date-time
+          description: ISO 8601 UTC timestamp.
+    CardTemplateInput:
+      type: object
+      properties:
+        card_template:
+          type: object
+          properties:
+            uuid:
+              type: string
+              description: Client-generated UUID (required for creation)
+            name:
+              type: string
+              description: Template display name (required for creation)
+            template_type_id:
+              type: integer
+              description: ID of the template type. Prefer template_type_code for portability across environments
+            template_type_code:
+              type: string
+              description: Code of the template type (e.g. ISO_CARD_STANDARD). Resolved server-side; takes precedence over template_type_id if both are given
+              example: ISO_CARD_STANDARD
+            card_type:
+              type: string
+              enum:
+              - standard
+              - signature_stripe
+            double_sided:
+              type: boolean
+            orientation_front:
+              type: string
+              enum:
+              - P
+              - L
+            orientation_back:
+              type: string
+              enum:
+              - P
+              - L
+            default_template:
+              type: boolean
+            template_objects:
+              type: array
+              description: Free-form JSONB objects representing layout elements. Replaces the entire array on update
+              items:
+                type: object
+            editable_by:
+              type: string
+              enum:
+              - owner_only
+              - any_admin
+              description: Who can edit this template
+            owner_id:
+              type: integer
+              nullable: true
+              description: |
+                Reassign ownership. Allowed for the current owner or any admin
+                in the account. The new owner must be an admin in the same
+                account. Ignored on create (owner is set server-side from the
+                authenticated user).
+            deleted_at:
+              type: string
+              format: date-time
+              nullable: true
+              description: |
+                Soft-delete timestamp. PATCH only. Setting a non-null value
+                soft-deletes the template; setting null restores it. The
+                deleted_by_id field is set server-side. For permanent deletion,
+                use DELETE /card_templates/{id}.
+            change_request_id:
+              type: string
+              format: uuid
+              description: Idempotency key for this change request
+    CardTemplateType:
+      type: object
+      required:
+      - code
+      - name
+      properties:
+        code:
+          type: string
+          description: Unique identifier for this type
+          example: ISO_CARD
+        name:
+          type: string
+          description: Display name
+          example: Standard ISO Card
+        page_size:
+          type: string
+          description: Physical page size category
+          enum:
+          - ISO_CARD
+          - A4
+          - A5
+          - LETTER
+          example: ISO_CARD
+        width_mm:
+          type: number
+          format: float
+          description: Physical width in millimetres
+          example: 85.6
+        height_mm:
+          type: number
+          format: float
+          description: Physical height in millimetres
+          example: 54.0
+        orientation_default:
+          type: string
+          description: "Default orientation: P = Portrait, L = Landscape"
+          enum:
+          - P
+          - L
+          example: L
+        preview_image_url:
+          type: string
+          nullable: true
+          description: URL to a preview image, or null if not set
+        non_printable_zones:
+          type: array
+          description: Non-printable zone definitions
+          items:
+            type: object
+            properties:
+              label:
+                type: string
+                description: Zone identifier
+                example: signature_stripe
+              x_mm:
+                type: number
+                format: float
+                description: X position from top-left in millimetres
+              y_mm:
+                type: number
+                format: float
+                description: Y position from top-left in millimetres
+              width_mm:
+                type: number
+                format: float
+                description: Zone width in millimetres
+              height_mm:
+                type: number
+                format: float
+                description: Zone height in millimetres
+        created_at:
+          type: string
+          format: date-time
+          description: When the record was created
+        updated_at:
+          type: string
+          format: date-time
+          description: When the record was last updated
+    CardTemplateTypeInput:
+      type: object
+      properties:
+        card_template_type:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Unique code (required for creation)
+            name:
+              type: string
+            page_size:
+              type: string
+              enum:
+              - ISO_CARD
+              - A4
+              - A5
+              - LETTER
+            width_mm:
+              type: number
+              format: float
+            height_mm:
+              type: number
+              format: float
+            orientation_default:
+              type: string
+              enum:
+              - P
+              - L
+            non_printable_zones:
+              type: array
+              description: Non-printable zones. Replaces the entire array on update
+              items:
+                type: object
+                properties:
+                  label:
+                    type: string
+                  x_mm:
+                    type: number
+                    format: float
+                  y_mm:
+                    type: number
+                    format: float
+                  width_mm:
+                    type: number
+                    format: float
+                  height_mm:
+                    type: number
+                    format: float
+    LinkedFile:
+      type: object
+      properties:
+        uuid:
+          type: string
+          description: Unique identifier for this linked file
+        entity_type:
+          type: string
+          description: Type of the parent entity
+        entity_uuid:
+          type: string
+          description: UUID of the parent entity
+        file_role:
+          type: string
+          description: Role of this file (e.g. background_front, background_back, logo)
+        url:
+          type: string
+          nullable: true
+          description: URL to download the file, or null if not yet uploaded
+        content_type:
+          type: string
+          description: MIME type of the file
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
   responses:
     UnauthorizedError:
       description: Unauthorized - Invalid or missing authentication

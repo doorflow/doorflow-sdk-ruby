@@ -27,3 +27,7 @@ lib/doorflow/client.rb
 lib/doorflow/list_object.rb
 lib/doorflow/resource.rb
 lib/doorflow/resources/**
+
+# Preserve customised test setup
+spec/spec_helper.rb
+doorflow-api.gemspec

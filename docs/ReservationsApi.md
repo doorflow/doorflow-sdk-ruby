@@ -80,7 +80,7 @@ end
 
 ## delete_reservation
 
-> <DeleteGroupReservation200Response> delete_reservation(id)
+> <DeleteCardDesign200Response> delete_reservation(id)
 
 Delete reservation
 
@@ -113,7 +113,7 @@ end
 
 This returns an Array which contains the response data, status code and headers.
 
-> <Array(<DeleteGroupReservation200Response>, Integer, Hash)> delete_reservation_with_http_info(id)
+> <Array(<DeleteCardDesign200Response>, Integer, Hash)> delete_reservation_with_http_info(id)
 
 ```ruby
 begin
@@ -121,7 +121,7 @@ begin
   data, status_code, headers = api_instance.delete_reservation_with_http_info(id)
   p status_code # => 2xx
   p headers # => { ... }
-  p data # => <DeleteGroupReservation200Response>
+  p data # => <DeleteCardDesign200Response>
 rescue DoorFlow::ApiError => e
   puts "Error when calling ReservationsApi->delete_reservation_with_http_info: #{e}"
 end
@@ -135,7 +135,7 @@ end
 
 ### Return type
 
-[**DeleteGroupReservation200Response**](DeleteGroupReservation200Response.md)
+[**DeleteCardDesign200Response**](DeleteCardDesign200Response.md)
 
 ### Authorization
 

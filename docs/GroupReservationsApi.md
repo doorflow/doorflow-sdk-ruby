@@ -6,6 +6,7 @@ All URIs are relative to *https://api.doorflow.com*
 | ------ | ------------ | ----------- |
 | [**create_group_reservation**](GroupReservationsApi.md#create_group_reservation) | **POST** /api/3/group_reservations | Create group reservation |
 | [**delete_group_reservation**](GroupReservationsApi.md#delete_group_reservation) | **DELETE** /api/3/group_reservations/{id} | Delete group reservation |
+| [**get_group_reservation**](GroupReservationsApi.md#get_group_reservation) | **GET** /api/3/group_reservations/{id} | Get group reservation |
 | [**list_group_reservations**](GroupReservationsApi.md#list_group_reservations) | **GET** /api/3/group_reservations | List group reservations |
 
 
@@ -80,7 +81,7 @@ end
 
 ## delete_group_reservation
 
-> <DeleteGroupReservation200Response> delete_group_reservation(id)
+> <DeleteCardDesign200Response> delete_group_reservation(id)
 
 Delete group reservation
 
@@ -113,7 +114,7 @@ end
 
 This returns an Array which contains the response data, status code and headers.
 
-> <Array(<DeleteGroupReservation200Response>, Integer, Hash)> delete_group_reservation_with_http_info(id)
+> <Array(<DeleteCardDesign200Response>, Integer, Hash)> delete_group_reservation_with_http_info(id)
 
 ```ruby
 begin
@@ -121,7 +122,7 @@ begin
   data, status_code, headers = api_instance.delete_group_reservation_with_http_info(id)
   p status_code # => 2xx
   p headers # => { ... }
-  p data # => <DeleteGroupReservation200Response>
+  p data # => <DeleteCardDesign200Response>
 rescue DoorFlow::ApiError => e
   puts "Error when calling GroupReservationsApi->delete_group_reservation_with_http_info: #{e}"
 end
@@ -135,7 +136,76 @@ end
 
 ### Return type
 
-[**DeleteGroupReservation200Response**](DeleteGroupReservation200Response.md)
+[**DeleteCardDesign200Response**](DeleteCardDesign200Response.md)
+
+### Authorization
+
+[OAuth2](../README.md#OAuth2)
+
+### HTTP request headers
+
+- **Content-Type**: Not defined
+- **Accept**: application/json
+
+
+## get_group_reservation
+
+> <GroupReservation> get_group_reservation(id)
+
+Get group reservation
+
+Returns a single group reservation by ID. 
+
+### Examples
+
+```ruby
+require 'time'
+require 'doorflow-api'
+# setup authorization
+DoorFlow.configure do |config|
+  # Configure OAuth2 access token for authorization: OAuth2
+  config.access_token = 'YOUR ACCESS TOKEN'
+end
+
+api_instance = DoorFlow::GroupReservationsApi.new
+id = 56 # Integer | Group reservation ID
+
+begin
+  # Get group reservation
+  result = api_instance.get_group_reservation(id)
+  p result
+rescue DoorFlow::ApiError => e
+  puts "Error when calling GroupReservationsApi->get_group_reservation: #{e}"
+end
+```
+
+#### Using the get_group_reservation_with_http_info variant
+
+This returns an Array which contains the response data, status code and headers.
+
+> <Array(<GroupReservation>, Integer, Hash)> get_group_reservation_with_http_info(id)
+
+```ruby
+begin
+  # Get group reservation
+  data, status_code, headers = api_instance.get_group_reservation_with_http_info(id)
+  p status_code # => 2xx
+  p headers # => { ... }
+  p data # => <GroupReservation>
+rescue DoorFlow::ApiError => e
+  puts "Error when calling GroupReservationsApi->get_group_reservation_with_http_info: #{e}"
+end
+```
+
+### Parameters
+
+| Name | Type | Description | Notes |
+| ---- | ---- | ----------- | ----- |
+| **id** | **Integer** | Group reservation ID |  |
+
+### Return type
+
+[**GroupReservation**](GroupReservation.md)
 
 ### Authorization
 

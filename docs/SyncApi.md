@@ -9,7 +9,7 @@ All URIs are relative to *https://api.doorflow.com*
 
 ## initiate_sync
 
-> <DeleteGroupReservation200Response> initiate_sync
+> <DeleteCardDesign200Response> initiate_sync
 
 Initiate sync
 
@@ -41,7 +41,7 @@ end
 
 This returns an Array which contains the response data, status code and headers.
 
-> <Array(<DeleteGroupReservation200Response>, Integer, Hash)> initiate_sync_with_http_info
+> <Array(<DeleteCardDesign200Response>, Integer, Hash)> initiate_sync_with_http_info
 
 ```ruby
 begin
@@ -49,7 +49,7 @@ begin
   data, status_code, headers = api_instance.initiate_sync_with_http_info
   p status_code # => 2xx
   p headers # => { ... }
-  p data # => <DeleteGroupReservation200Response>
+  p data # => <DeleteCardDesign200Response>
 rescue DoorFlow::ApiError => e
   puts "Error when calling SyncApi->initiate_sync_with_http_info: #{e}"
 end
@@ -61,7 +61,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**DeleteGroupReservation200Response**](DeleteGroupReservation200Response.md)
+[**DeleteCardDesign200Response**](DeleteCardDesign200Response.md)
 
 ### Authorization
 

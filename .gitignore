@@ -37,13 +37,3 @@ build/
 
 # unless supporting rvm < 1.11.0 or doing something fancy, ignore this:
 .rvmrc
-
-# VCR cassettes (may contain sensitive data)
-spec/fixtures/vcr_cassettes/
-
-# IDE files
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
