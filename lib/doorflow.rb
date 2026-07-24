@@ -28,6 +28,7 @@ require 'doorflow/resources/person'
 require 'doorflow/resources/reservation'
 require 'doorflow/resources/role'
 require 'doorflow/resources/site'
+require 'doorflow/resources/element_session'
 
 # DoorFlow Ruby SDK for access control and door management
 #
@@ -142,10 +143,15 @@ module DoorFlow
       DoorFlow.configure do |config|
         config.access_token = @access_token if @access_token
         if @api_base
-          # Parse the URL to extract scheme and host
+          # Parse the URL to extract scheme and host, keeping any non-default
+          # port (e.g. http://localhost:3000) in the host.
           uri = URI.parse(@api_base)
           config.scheme = uri.scheme if uri.scheme
-          config.host = uri.host if uri.host
+          if uri.host
+            host = uri.host
+            host += ":#{uri.port}" if uri.port && uri.port != uri.default_port
+            config.host = host
+          end
         end
       end
     end

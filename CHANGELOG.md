@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.1.0] - 2026-07-24
+
+### Added
+- `Credential#status` accepts `added_to_wallet` for PassFlow credentials added to a wallet, with `wallet_type` (`apple`/`google`) — previously raised `ArgumentError` during deserialisation
+- Element session support: `client.admin_sessions` / `client.member_sessions` proxies and `ElementSessionResource`
+- New endpoints from the current OpenAPI spec: card designs, card templates, element sessions, admission requests, notification rules, sync
+
+### Fixed
+- `DoorFlow.api_base=` no longer drops an explicit port (e.g. `http://localhost:3000`)
+- Gem is built as `doorflow` (matching the published gem name) rather than `doorflow-api`
+
+### Removed
+- Stale models no longer produced by generation: `CreateCredential422Response`, `CreateCredential422ResponseErrors`, `DeleteGroupReservation200Response`
+
 ## [1.0.0] - 2025-02-04
 
 ### Added

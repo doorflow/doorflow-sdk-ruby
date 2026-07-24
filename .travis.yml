@@ -8,4 +8,4 @@ script:
   - bundle install --path vendor/bundle
   - bundle exec rspec
   - gem build doorflow-api.gemspec
-  - gem install ./doorflow-api-1.0.0.gem
+  - gem install ./doorflow-api-1.1.0.gem
