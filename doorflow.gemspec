@@ -50,7 +50,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'rdoc', '~> 6.7'
 
   s.files         = Dir.glob("{lib,bin}/**/*") + %w[README.md LICENSE CHANGELOG.md doorflow.gemspec]
-  s.test_files    = Dir.glob("spec/**/*")
   s.executables   = []
   s.require_paths = ["lib"]
 end
