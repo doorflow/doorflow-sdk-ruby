@@ -35,6 +35,7 @@ Gem::Specification.new do |s|
     "rubygems_mfa_required" => "true"
   }
 
+  s.add_runtime_dependency 'base64', '~> 0.2'
   s.add_runtime_dependency 'faraday', '>= 1.0.1', '< 3.0'
   s.add_runtime_dependency 'faraday-multipart', '~> 1.0'
   s.add_runtime_dependency 'marcel', '~> 1.0'
