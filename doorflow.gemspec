@@ -16,7 +16,7 @@ $:.push File.expand_path("../lib", __FILE__)
 require "doorflow-api/version"
 
 Gem::Specification.new do |s|
-  s.name        = "doorflow-api"
+  s.name        = "doorflow"
   s.version     = DoorFlow::VERSION
   s.platform    = Gem::Platform::RUBY
   s.authors     = ["NetNodes Ltd"]
@@ -48,7 +48,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'yard', '~> 0.9'
   s.add_development_dependency 'rdoc', '~> 6.7'
 
-  s.files         = Dir.glob("{lib,bin}/**/*") + %w[README.md LICENSE CHANGELOG.md doorflow-api.gemspec]
+  s.files         = Dir.glob("{lib,bin}/**/*") + %w[README.md LICENSE CHANGELOG.md doorflow.gemspec]
   s.test_files    = Dir.glob("spec/**/*")
   s.executables   = []
   s.require_paths = ["lib"]

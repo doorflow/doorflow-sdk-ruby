@@ -25,10 +25,10 @@ gem build doorflow-api.gemspec
 Then either install the gem locally:
 
 ```shell
-gem install ./doorflow-api-1.1.0.gem
+gem install ./doorflow-1.1.0.gem
 ```
 
-(for development, run `gem install --dev ./doorflow-api-1.1.0.gem` to install the development dependencies)
+(for development, run `gem install --dev ./doorflow-1.1.0.gem` to install the development dependencies)
 
 or publish the gem to a gem hosting service, e.g. [RubyGems](https://rubygems.org/).
 
