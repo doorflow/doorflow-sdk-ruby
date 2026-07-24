@@ -21,7 +21,9 @@ wrapper_files = [
   'lib/doorflow/resources/person.rb',
   'lib/doorflow/resources/reservation.rb',
   'lib/doorflow/resources/role.rb',
-  'lib/doorflow/resources/site.rb'
+  'lib/doorflow/resources/site.rb',
+  'lib/doorflow/resources/element_session.rb',
+  'lib/doorflow/client/element_sessions_proxy.rb'
 ]
 
 missing_files = wrapper_files.reject { |f| File.exist?(f) }

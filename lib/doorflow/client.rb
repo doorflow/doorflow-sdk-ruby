@@ -129,6 +129,18 @@ module DoorFlow
       @account ||= AccountProxy.new(self)
     end
 
+    # Access admin widget sessions
+    # @return [DoorFlow::Client::AdminSessionsProxy] admin sessions resource proxy
+    def admin_sessions
+      @admin_sessions ||= AdminSessionsProxy.new(self)
+    end
+
+    # Access member widget sessions
+    # @return [DoorFlow::Client::MemberSessionsProxy] member sessions resource proxy
+    def member_sessions
+      @member_sessions ||= MemberSessionsProxy.new(self)
+    end
+
     # ============================================
     # Low-level API accessors (for advanced use)
     # ============================================
@@ -261,3 +273,4 @@ require_relative 'client/reservations_proxy'
 require_relative 'client/group_reservations_proxy'
 require_relative 'client/notification_rules_proxy'
 require_relative 'client/account_proxy'
+require_relative 'client/element_sessions_proxy'
