@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Module: DoorFlow::Webhooks
+  
+    &mdash; DoorFlow Ruby SDK Documentation
+  
+</title>
+
+  <link rel="stylesheet" href="../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../css/common.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "DoorFlow::Webhooks";
+  relpath = '../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../_index.html">Index (W)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span>
+     &raquo; 
+    <span class="title">Webhooks</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Module: DoorFlow::Webhooks
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/doorflow/webhooks.rb<span class="defines">,<br>
+  lib/doorflow/webhooks/event.rb,<br> lib/doorflow/webhooks/handler.rb,<br> lib/doorflow/webhooks/signature_verifier.rb</span>
+
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>Webhook handling utilities for DoorFlow webhooks</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Verifying a webhook</p></div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_events'>events</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>Webhooks</span><span class='period'>.</span><span class='id identifier rubyid_verify'><span class='object_link'><a href="#verify-class_method" title="DoorFlow::Webhooks.verify (method)">verify</a></span></span><span class='lparen'>(</span>
+  <span class='label'>payload:</span> <span class='id identifier rubyid_request'>request</span><span class='period'>.</span><span class='id identifier rubyid_raw_post'>raw_post</span><span class='comma'>,</span>
+  <span class='label'>signature:</span> <span class='id identifier rubyid_request'>request</span><span class='period'>.</span><span class='id identifier rubyid_headers'>headers</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>X-DoorFlow-Signature</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='label'>timestamp:</span> <span class='id identifier rubyid_request'>request</span><span class='period'>.</span><span class='id identifier rubyid_headers'>headers</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>X-DoorFlow-Timestamp</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='label'>secret:</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>DOORFLOW_WEBHOOK_SECRET</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span>
+<span class='rparen'>)</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Using the handler</p></div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_handler'>handler</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>Webhooks</span><span class='period'>.</span><span class='id identifier rubyid_handler'><span class='object_link'><a href="#handler-class_method" title="DoorFlow::Webhooks.handler (method)">handler</a></span></span><span class='lparen'>(</span><span class='label'>secret:</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>WEBHOOK_SECRET</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_handler'>handler</span><span class='period'>.</span><span class='id identifier rubyid_on'>on</span><span class='lparen'>(</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Event.CREATE</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span> <span class='lbrace'>{</span> <span class='op'>|</span><span class='id identifier rubyid_event'>event</span><span class='op'>|</span> <span class='id identifier rubyid_process'>process</span><span class='lparen'>(</span><span class='id identifier rubyid_event'>event</span><span class='rparen'>)</span> <span class='rbrace'>}</span>
+<span class='id identifier rubyid_handler'>handler</span><span class='period'>.</span><span class='id identifier rubyid_handle'>handle</span><span class='lparen'>(</span><span class='label'>payload:</span> <span class='id identifier rubyid_body'>body</span><span class='comma'>,</span> <span class='label'>signature:</span> <span class='id identifier rubyid_sig'>sig</span><span class='comma'>,</span> <span class='label'>timestamp:</span> <span class='id identifier rubyid_ts'>ts</span><span class='rparen'>)</span></code></pre>
+    
+  </div>
+
+
+</div><h2>Defined Under Namespace</h2>
+<p class="children">
+  
+    
+      <strong class="modules">Modules:</strong> <span class='object_link'><a href="Webhooks/SignatureVerifier.html" title="DoorFlow::Webhooks::SignatureVerifier (module)">SignatureVerifier</a></span>
+    
+  
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Webhooks/Event.html" title="DoorFlow::Webhooks::Event (class)">Event</a></span>, <span class='object_link'><a href="Webhooks/Handler.html" title="DoorFlow::Webhooks::Handler (class)">Handler</a></span>, <span class='object_link'><a href="Webhooks/SignatureError.html" title="DoorFlow::Webhooks::SignatureError (class)">SignatureError</a></span>
+    
+  
+</p>
+
+
+
+
+
+
+
+  
+    <h2>
+      Class Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#handler-class_method" title="handler (class method)">.<strong>handler</strong>(secret:, client: nil)  &#x21d2; Handler </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Create a new webhook handler.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#verify-class_method" title="verify (class method)">.<strong>verify</strong>(payload:, signature:, timestamp:, secret:, tolerance: 300)  &#x21d2; Object </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Verify a webhook signature and parse events.</p></div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+
+
+  <div id="class_method_details" class="method_details_list">
+    <h2>Class Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="handler-class_method">
+  
+    .<strong>handler</strong>(secret:, client: nil)  &#x21d2; <tt><span class='object_link'><a href="Webhooks/Handler.html" title="DoorFlow::Webhooks::Handler (class)">Handler</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Create a new webhook handler</p>
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>secret</span>
+      
+      
+        <span class='type'>(<tt>String</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>Webhook secret</p></div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>client</span>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client.html" title="DoorFlow::Client (class)">DoorFlow::Client</a></span></tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Optional client for auto-fetch</p></div>
+      
+    </li>
+  
+</ul>
+
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Webhooks/Handler.html" title="DoorFlow::Webhooks::Handler (class)">Handler</a></span></tt>)</span>
+      
+      
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+42
+43
+44</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/webhooks.rb', line 42</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_handler'>handler</span><span class='lparen'>(</span><span class='label'>secret:</span><span class='comma'>,</span> <span class='label'>client:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='const'><span class='object_link'><a href="Webhooks/Handler.html" title="DoorFlow::Webhooks::Handler (class)">Handler</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Webhooks/Handler.html#initialize-instance_method" title="DoorFlow::Webhooks::Handler#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>secret:</span> <span class='id identifier rubyid_secret'>secret</span><span class='comma'>,</span> <span class='label'>client:</span> <span class='id identifier rubyid_client'>client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="verify-class_method">
+  
+    .<strong>verify</strong>(payload:, signature:, timestamp:, secret:, tolerance: 300)  &#x21d2; <tt>Object</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Verify a webhook signature and parse events</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+
+  <p class="tag_title">See Also:</p>
+  <ul class="see">
+    
+      <li><span class='object_link'><a href="Webhooks/SignatureVerifier.html#verify-class_method" title="DoorFlow::Webhooks::SignatureVerifier.verify (method)">DoorFlow::Webhooks::SignatureVerifier.verify</a></span></li>
+    
+  </ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+27
+28
+29
+30
+31
+32
+33
+34
+35</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/webhooks.rb', line 27</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_verify'>verify</span><span class='lparen'>(</span><span class='label'>payload:</span><span class='comma'>,</span> <span class='label'>signature:</span><span class='comma'>,</span> <span class='label'>timestamp:</span><span class='comma'>,</span> <span class='label'>secret:</span><span class='comma'>,</span> <span class='label'>tolerance:</span> <span class='int'>300</span><span class='rparen'>)</span>
+  <span class='const'><span class='object_link'><a href="Webhooks/SignatureVerifier.html" title="DoorFlow::Webhooks::SignatureVerifier (module)">SignatureVerifier</a></span></span><span class='period'>.</span><span class='id identifier rubyid_verify'><span class='object_link'><a href="Webhooks/SignatureVerifier.html#verify-class_method" title="DoorFlow::Webhooks::SignatureVerifier.verify (method)">verify</a></span></span><span class='lparen'>(</span>
+    <span class='label'>payload:</span> <span class='id identifier rubyid_payload'>payload</span><span class='comma'>,</span>
+    <span class='label'>signature:</span> <span class='id identifier rubyid_signature'>signature</span><span class='comma'>,</span>
+    <span class='label'>timestamp:</span> <span class='id identifier rubyid_timestamp'>timestamp</span><span class='comma'>,</span>
+    <span class='label'>secret:</span> <span class='id identifier rubyid_secret'>secret</span><span class='comma'>,</span>
+    <span class='label'>tolerance:</span> <span class='id identifier rubyid_tolerance'>tolerance</span>
+  <span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Wed Nov  4 09:51:19 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-3.4.12).
+</div>
+
+    </div>
+  </body>
+</html>

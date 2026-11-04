@@ -1,0 +1,2787 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>
+  Class: DoorFlow::Client
+  
+    &mdash; DoorFlow Ruby SDK Documentation
+  
+</title>
+
+  <link rel="stylesheet" href="../css/style.css" type="text/css">
+
+  <link rel="stylesheet" href="../css/common.css" type="text/css">
+
+<script type="text/javascript">
+  pathId = "DoorFlow::Client";
+  relpath = '../';
+</script>
+
+
+  <script type="text/javascript" charset="utf-8" src="../js/jquery.js"></script>
+
+  <script type="text/javascript" charset="utf-8" src="../js/app.js"></script>
+
+
+  </head>
+  <body>
+    <div id="main_progress" aria-hidden="true"></div>
+
+    <div class="nav_wrap">
+      <iframe id="nav" src="../class_list.html?1"></iframe>
+      <div id="resizer"></div>
+    </div>
+
+    <div id="main" tabindex="-1">
+      <div id="header">
+        <div id="menu">
+  
+    <a href="../_index.html">Index (C)</a> &raquo;
+    <span class='title'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span>
+     &raquo; 
+    <span class="title">Client</span>
+  
+</div>
+
+        <div id="search">
+  
+    <a class="full_list_link" id="class_list_link"
+        href="../class_list.html">
+
+        <svg width="24" height="24">
+          <rect x="0" y="4" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="12" width="24" height="4" rx="1" ry="1"></rect>
+          <rect x="0" y="20" width="24" height="4" rx="1" ry="1"></rect>
+        </svg>
+    </a>
+  
+</div>
+        <div class="clear"></div>
+      </div>
+
+      <div id="content"><h1>Class: DoorFlow::Client
+  
+  
+  
+</h1>
+<div class="box_info">
+  
+  <dl>
+    <dt>Inherits:</dt>
+    <dd>
+      <span class="inheritName">Object</span>
+      
+        <ul class="fullTree">
+          <li>Object</li>
+          
+            <li class="next">DoorFlow::Client</li>
+          
+        </ul>
+        <a href="#" class="inheritanceTree">show all</a>
+      
+    </dd>
+  </dl>
+  
+
+  
+  
+  
+  
+  
+
+  
+
+  
+  <dl>
+    <dt>Defined in:</dt>
+    <dd>lib/doorflow/client.rb<span class="defines">,<br>
+  lib/doorflow/client/roles_proxy.rb,<br> lib/doorflow/client/sites_proxy.rb,<br> lib/doorflow/client/events_proxy.rb,<br> lib/doorflow/client/groups_proxy.rb,<br> lib/doorflow/client/people_proxy.rb,<br> lib/doorflow/client/account_proxy.rb,<br> lib/doorflow/client/channels_proxy.rb,<br> lib/doorflow/client/resource_proxy.rb,<br> lib/doorflow/client/credentials_proxy.rb,<br> lib/doorflow/client/reservations_proxy.rb,<br> lib/doorflow/client/credential_types_proxy.rb,<br> lib/doorflow/client/element_sessions_proxy.rb,<br> lib/doorflow/client/group_reservations_proxy.rb,<br> lib/doorflow/client/notification_rules_proxy.rb</span>
+
+</dd>
+  </dl>
+  
+</div>
+
+<h2>Overview</h2><div class="docstring">
+  <div class="discussion">
+    <p>HTTP client for accessing the DoorFlow API</p>
+<p>The Client is the primary interface for making API calls in multi-tenant
+applications or when you need explicit control over authentication.</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+  <div class="examples">
+    <h4 class="tag_title">Examples:</h4>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Using with an auth object (recommended for web apps)</p></div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_auth'>auth</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Auth.html" title="DoorFlow::Auth (module)">Auth</a></span></span><span class='op'>::</span><span class='const'><span class='object_link'><a href="Auth/DoorFlowAuth.html" title="DoorFlow::Auth::DoorFlowAuth (class)">DoorFlowAuth</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Auth/DoorFlowAuth.html#initialize-instance_method" title="DoorFlow::Auth::DoorFlowAuth#initialize (method)">new</a></span></span><span class='lparen'>(</span>
+  <span class='label'>client_id:</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>DOORFLOW_CLIENT_ID</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='label'>client_secret:</span> <span class='const'>ENV</span><span class='lbracket'>[</span><span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>DOORFLOW_CLIENT_SECRET</span><span class='tstring_end'>&#39;</span></span><span class='rbracket'>]</span><span class='comma'>,</span>
+  <span class='label'>redirect_uri:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>https://example.com/callback</span><span class='tstring_end'>&#39;</span></span><span class='comma'>,</span>
+  <span class='label'>storage:</span> <span class='id identifier rubyid_my_token_storage'>my_token_storage</span>
+<span class='rparen'>)</span>
+
+<span class='id identifier rubyid_client'>client</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>Client</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="DoorFlow::Client#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>auth:</span> <span class='id identifier rubyid_auth'>auth</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_people'>people</span> <span class='op'>=</span> <span class='id identifier rubyid_client'>client</span><span class='period'>.</span><span class='id identifier rubyid_people'>people</span><span class='period'>.</span><span class='id identifier rubyid_list'>list</span>
+<span class='id identifier rubyid_person'>person</span> <span class='op'>=</span> <span class='id identifier rubyid_client'>client</span><span class='period'>.</span><span class='id identifier rubyid_people'>people</span><span class='period'>.</span><span class='id identifier rubyid_retrieve'>retrieve</span><span class='lparen'>(</span><span class='int'>123</span><span class='rparen'>)</span>
+<span class='id identifier rubyid_person'>person</span><span class='period'>.</span><span class='id identifier rubyid_update'>update</span><span class='lparen'>(</span><span class='label'>first_name:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>Jane</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span></code></pre>
+    
+      
+        <h5 class="example_title"><div class='inline'><p>Using with a static access token</p></div></h5>
+      
+      <pre class="example code"><code><span class='id identifier rubyid_client'>client</span> <span class='op'>=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>Client</span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="#initialize-instance_method" title="DoorFlow::Client#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='label'>access_token:</span> <span class='tstring'><span class='tstring_beg'>&#39;</span><span class='tstring_content'>your_token</span><span class='tstring_end'>&#39;</span></span><span class='rparen'>)</span>
+<span class='id identifier rubyid_people'>people</span> <span class='op'>=</span> <span class='id identifier rubyid_client'>client</span><span class='period'>.</span><span class='id identifier rubyid_people'>people</span><span class='period'>.</span><span class='id identifier rubyid_list'>list</span></code></pre>
+    
+  </div>
+
+
+</div><h2>Defined Under Namespace</h2>
+<p class="children">
+  
+    
+  
+    
+      <strong class="classes">Classes:</strong> <span class='object_link'><a href="Client/AccountProxy.html" title="DoorFlow::Client::AccountProxy (class)">AccountProxy</a></span>, <span class='object_link'><a href="Client/AdminSessionsProxy.html" title="DoorFlow::Client::AdminSessionsProxy (class)">AdminSessionsProxy</a></span>, <span class='object_link'><a href="Client/ChannelsProxy.html" title="DoorFlow::Client::ChannelsProxy (class)">ChannelsProxy</a></span>, <span class='object_link'><a href="Client/CredentialTypesProxy.html" title="DoorFlow::Client::CredentialTypesProxy (class)">CredentialTypesProxy</a></span>, <span class='object_link'><a href="Client/CredentialsProxy.html" title="DoorFlow::Client::CredentialsProxy (class)">CredentialsProxy</a></span>, <span class='object_link'><a href="Client/ElementSessionsProxy.html" title="DoorFlow::Client::ElementSessionsProxy (class)">ElementSessionsProxy</a></span>, <span class='object_link'><a href="Client/EventsProxy.html" title="DoorFlow::Client::EventsProxy (class)">EventsProxy</a></span>, <span class='object_link'><a href="Client/GroupReservationsProxy.html" title="DoorFlow::Client::GroupReservationsProxy (class)">GroupReservationsProxy</a></span>, <span class='object_link'><a href="Client/GroupsProxy.html" title="DoorFlow::Client::GroupsProxy (class)">GroupsProxy</a></span>, <span class='object_link'><a href="Client/MemberSessionsProxy.html" title="DoorFlow::Client::MemberSessionsProxy (class)">MemberSessionsProxy</a></span>, <span class='object_link'><a href="Client/NotificationRulesProxy.html" title="DoorFlow::Client::NotificationRulesProxy (class)">NotificationRulesProxy</a></span>, <span class='object_link'><a href="Client/PeopleProxy.html" title="DoorFlow::Client::PeopleProxy (class)">PeopleProxy</a></span>, <span class='object_link'><a href="Client/ReservationsProxy.html" title="DoorFlow::Client::ReservationsProxy (class)">ReservationsProxy</a></span>, <span class='object_link'><a href="Client/ResourceProxy.html" title="DoorFlow::Client::ResourceProxy (class)">ResourceProxy</a></span>, <span class='object_link'><a href="Client/RolesProxy.html" title="DoorFlow::Client::RolesProxy (class)">RolesProxy</a></span>, <span class='object_link'><a href="Client/SitesProxy.html" title="DoorFlow::Client::SitesProxy (class)">SitesProxy</a></span>
+    
+  
+</p>
+
+
+
+
+  <h2>Instance Attribute Summary <small><a href="#" class="summary_toggle">collapse</a></small></h2>
+  <ul class="summary">
+    
+      <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#auth-instance_method" title="#auth (instance method)">#<strong>auth</strong>  &#x21d2; Object<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+    
+      <span class="note title readonly">readonly</span>
+    
+    
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>The auth object (responds to #access_token).</p></div></span>
+  
+</li>
+
+    
+  </ul>
+
+
+
+
+  
+    <h2>
+      Instance Method Summary
+      <small><a href="#" class="summary_toggle">collapse</a></small>
+    </h2>
+
+    <ul class="summary">
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#access_token-instance_method" title="#access_token (instance method)">#<strong>access_token</strong>  &#x21d2; String<sup>?</sup> </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Get the current access token If an auth object is provided, calls auth.access_token (which may refresh) Otherwise returns the static access token.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#account-instance_method" title="#account (instance method)">#<strong>account</strong>  &#x21d2; DoorFlow::Client::AccountProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Account resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#accounts_api-instance_method" title="#accounts_api (instance method)">#<strong>accounts_api</strong>  &#x21d2; DoorFlow::AccountsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Accounts API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#admin_sessions-instance_method" title="#admin_sessions (instance method)">#<strong>admin_sessions</strong>  &#x21d2; DoorFlow::Client::AdminSessionsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access admin widget sessions.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#admission_requests_api-instance_method" title="#admission_requests_api (instance method)">#<strong>admission_requests_api</strong>  &#x21d2; DoorFlow::AdmissionRequestsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Admission Requests API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#authenticated%3F-instance_method" title="#authenticated? (instance method)">#<strong>authenticated?</strong>  &#x21d2; Boolean </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Check if the client is authenticated.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#channels-instance_method" title="#channels (instance method)">#<strong>channels</strong>  &#x21d2; DoorFlow::Client::ChannelsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Channels resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#channels_api-instance_method" title="#channels_api (instance method)">#<strong>channels_api</strong>  &#x21d2; DoorFlow::ChannelsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Channels API for door control operations.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#credential_types-instance_method" title="#credential_types (instance method)">#<strong>credential_types</strong>  &#x21d2; DoorFlow::Client::CredentialTypesProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Credential Types resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#credential_types_api-instance_method" title="#credential_types_api (instance method)">#<strong>credential_types_api</strong>  &#x21d2; DoorFlow::CredentialTypesApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Credential Types API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#credentials-instance_method" title="#credentials (instance method)">#<strong>credentials</strong>  &#x21d2; DoorFlow::Client::CredentialsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Credentials resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#credentials_api-instance_method" title="#credentials_api (instance method)">#<strong>credentials_api</strong>  &#x21d2; DoorFlow::CredentialsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Credentials API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#events-instance_method" title="#events (instance method)">#<strong>events</strong>  &#x21d2; DoorFlow::Client::EventsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Events resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#events_api-instance_method" title="#events_api (instance method)">#<strong>events_api</strong>  &#x21d2; DoorFlow::EventsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Events API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#group_reservations-instance_method" title="#group_reservations (instance method)">#<strong>group_reservations</strong>  &#x21d2; DoorFlow::Client::GroupReservationsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Group Reservations resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#group_reservations_api-instance_method" title="#group_reservations_api (instance method)">#<strong>group_reservations_api</strong>  &#x21d2; DoorFlow::GroupReservationsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Group Reservations API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#groups-instance_method" title="#groups (instance method)">#<strong>groups</strong>  &#x21d2; DoorFlow::Client::GroupsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Groups resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#groups_api-instance_method" title="#groups_api (instance method)">#<strong>groups_api</strong>  &#x21d2; DoorFlow::GroupsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Groups API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#initialize-instance_method" title="#initialize (instance method)">#<strong>initialize</strong>(auth: nil, access_token: nil)  &#x21d2; Client </a>
+    
+
+    
+  </span>
+  
+  
+    <span class="note title constructor">constructor</span>
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Create a new API client.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#member_sessions-instance_method" title="#member_sessions (instance method)">#<strong>member_sessions</strong>  &#x21d2; DoorFlow::Client::MemberSessionsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access member widget sessions.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#notification_rules-instance_method" title="#notification_rules (instance method)">#<strong>notification_rules</strong>  &#x21d2; DoorFlow::Client::NotificationRulesProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Notification Rules resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#notification_rules_api-instance_method" title="#notification_rules_api (instance method)">#<strong>notification_rules_api</strong>  &#x21d2; DoorFlow::NotificationRulesApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Notification Rules API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#oauth_api-instance_method" title="#oauth_api (instance method)">#<strong>oauth_api</strong>  &#x21d2; DoorFlow::OauthApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the OAuth API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#people-instance_method" title="#people (instance method)">#<strong>people</strong>  &#x21d2; DoorFlow::Client::PeopleProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the People resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#people_api-instance_method" title="#people_api (instance method)">#<strong>people_api</strong>  &#x21d2; DoorFlow::PeopleApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the People API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reservations-instance_method" title="#reservations (instance method)">#<strong>reservations</strong>  &#x21d2; DoorFlow::Client::ReservationsProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Reservations resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#reservations_api-instance_method" title="#reservations_api (instance method)">#<strong>reservations_api</strong>  &#x21d2; DoorFlow::ReservationsApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Reservations API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#roles-instance_method" title="#roles (instance method)">#<strong>roles</strong>  &#x21d2; DoorFlow::Client::RolesProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Roles resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#roles_api-instance_method" title="#roles_api (instance method)">#<strong>roles_api</strong>  &#x21d2; DoorFlow::RolesApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Roles API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#sites-instance_method" title="#sites (instance method)">#<strong>sites</strong>  &#x21d2; DoorFlow::Client::SitesProxy </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Sites resource.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#sites_api-instance_method" title="#sites_api (instance method)">#<strong>sites_api</strong>  &#x21d2; DoorFlow::SitesApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Sites API.</p></div></span>
+  
+</li>
+
+      
+        <li class="public ">
+  <span class="summary_signature">
+    
+      <a href="#sync_api-instance_method" title="#sync_api (instance method)">#<strong>sync_api</strong>  &#x21d2; DoorFlow::SyncApi </a>
+    
+
+    
+  </span>
+  
+  
+  
+  
+  
+  
+  
+
+  
+    <span class="summary_desc"><div class='inline'><p>Access the Sync API.</p></div></span>
+  
+</li>
+
+      
+    </ul>
+    
+  
+
+<div id="constructor_details" class="method_details_list">
+  <h2>Constructor Details</h2>
+  
+    <div class="method_details first">
+  <h3 class="signature first" id="initialize-instance_method">
+  
+    #<strong>initialize</strong>(auth: nil, access_token: nil)  &#x21d2; <tt><span class='object_link'><a href="" title="DoorFlow::Client (class)">Client</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Create a new API client</p>
+
+  </div>
+</div>
+<div class="tags">
+  <p class="tag_title">Parameters:</p>
+<ul class="param">
+  
+    <li>
+      
+        <span class='name'>auth</span>
+      
+      
+        <span class='type'>(<tt>Object</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Auth object that responds to #access_token (handles token refresh)</p></div>
+      
+    </li>
+  
+    <li>
+      
+        <span class='name'>access_token</span>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+        <em class="default">(defaults to: <tt>nil</tt>)</em>
+      
+      
+        &mdash;
+        <div class='inline'><p>Static access token (use auth: for auto-refresh)</p></div>
+      
+    </li>
+  
+</ul>
+
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+32
+33
+34
+35</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 32</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_initialize'>initialize</span><span class='lparen'>(</span><span class='label'>auth:</span> <span class='kw'>nil</span><span class='comma'>,</span> <span class='label'>access_token:</span> <span class='kw'>nil</span><span class='rparen'>)</span>
+  <span class='ivar'>@auth</span> <span class='op'>=</span> <span class='id identifier rubyid_auth'>auth</span>
+  <span class='ivar'>@static_access_token</span> <span class='op'>=</span> <span class='id identifier rubyid_access_token'>access_token</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+  
+</div>
+
+  <div id="instance_attr_details" class="attr_details">
+    <h2>Instance Attribute Details</h2>
+    
+      
+      <span id=""></span>
+      <div class="method_details first">
+  <h3 class="signature first" id="auth-instance_method">
+  
+    #<strong>auth</strong>  &#x21d2; <tt>Object</tt><sup>?</sup>  <span class="extras">(readonly)</span>
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Returns the auth object (responds to #access_token).</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Object</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the auth object (responds to #access_token)</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+25
+26
+27</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 25</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_auth'>auth</span>
+  <span class='ivar'>@auth</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+
+  <div id="instance_method_details" class="method_details_list">
+    <h2>Instance Method Details</h2>
+
+    
+      <div class="method_details first">
+  <h3 class="signature first" id="access_token-instance_method">
+  
+    #<strong>access_token</strong>  &#x21d2; <tt>String</tt><sup>?</sup> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Get the current access token
+If an auth object is provided, calls auth.access_token (which may refresh)
+Otherwise returns the static access token</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>String</tt>, <tt>nil</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>the current access token</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+42
+43
+44</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 42</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_access_token'>access_token</span>
+  <span class='ivar'>@auth</span><span class='op'>&amp;.</span><span class='id identifier rubyid_access_token'>access_token</span> <span class='op'>||</span> <span class='ivar'>@static_access_token</span> <span class='op'>||</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='period'>.</span><span class='id identifier rubyid_access_token'><span class='object_link'><a href="../DoorFlow.html#access_token-class_method" title="DoorFlow.access_token (method)">access_token</a></span></span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="account-instance_method">
+  
+    #<strong>account</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/AccountProxy.html" title="DoorFlow::Client::AccountProxy (class)">DoorFlow::Client::AccountProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Account resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/AccountProxy.html" title="DoorFlow::Client::AccountProxy (class)">DoorFlow::Client::AccountProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>account resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+128
+129
+130</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 128</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_account'>account</span>
+  <span class='ivar'>@account</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/AccountProxy.html" title="DoorFlow::Client::AccountProxy (class)">AccountProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="accounts_api-instance_method">
+  
+    #<strong>accounts_api</strong>  &#x21d2; <tt>DoorFlow::AccountsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Accounts API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::AccountsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>accounts API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+150
+151
+152</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 150</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_accounts_api'>accounts_api</span>
+  <span class='ivar'>@accounts_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>AccountsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="admin_sessions-instance_method">
+  
+    #<strong>admin_sessions</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/AdminSessionsProxy.html" title="DoorFlow::Client::AdminSessionsProxy (class)">DoorFlow::Client::AdminSessionsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access admin widget sessions</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/AdminSessionsProxy.html" title="DoorFlow::Client::AdminSessionsProxy (class)">DoorFlow::Client::AdminSessionsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>admin sessions resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+134
+135
+136</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 134</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_admin_sessions'>admin_sessions</span>
+  <span class='ivar'>@admin_sessions</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/AdminSessionsProxy.html" title="DoorFlow::Client::AdminSessionsProxy (class)">AdminSessionsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="admission_requests_api-instance_method">
+  
+    #<strong>admission_requests_api</strong>  &#x21d2; <tt>DoorFlow::AdmissionRequestsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Admission Requests API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::AdmissionRequestsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>admission requests API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+156
+157
+158</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 156</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_admission_requests_api'>admission_requests_api</span>
+  <span class='ivar'>@admission_requests_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>AdmissionRequestsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="authenticated?-instance_method">
+  
+    #<strong>authenticated?</strong>  &#x21d2; <tt>Boolean</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Check if the client is authenticated</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>Boolean</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>true if connected with valid credentials</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+48
+49
+50
+51
+52
+53
+54</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 48</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_authenticated?'>authenticated?</span>
+  <span class='kw'>if</span> <span class='ivar'>@auth</span>
+    <span class='ivar'>@auth</span><span class='period'>.</span><span class='id identifier rubyid_respond_to?'>respond_to?</span><span class='lparen'>(</span><span class='symbol'>:authenticated?</span><span class='rparen'>)</span> <span class='op'>?</span> <span class='ivar'>@auth</span><span class='period'>.</span><span class='id identifier rubyid_authenticated?'>authenticated?</span> <span class='op'>:</span> <span class='op'>!</span><span class='ivar'>@auth</span><span class='period'>.</span><span class='id identifier rubyid_access_token'>access_token</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+  <span class='kw'>else</span>
+    <span class='op'>!</span><span class='id identifier rubyid_access_token'>access_token</span><span class='period'>.</span><span class='id identifier rubyid_to_s'>to_s</span><span class='period'>.</span><span class='id identifier rubyid_empty?'>empty?</span>
+  <span class='kw'>end</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="channels-instance_method">
+  
+    #<strong>channels</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/ChannelsProxy.html" title="DoorFlow::Client::ChannelsProxy (class)">DoorFlow::Client::ChannelsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Channels resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/ChannelsProxy.html" title="DoorFlow::Client::ChannelsProxy (class)">DoorFlow::Client::ChannelsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>channels resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+86
+87
+88</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 86</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_channels'>channels</span>
+  <span class='ivar'>@channels</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/ChannelsProxy.html" title="DoorFlow::Client::ChannelsProxy (class)">ChannelsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="channels_api-instance_method">
+  
+    #<strong>channels_api</strong>  &#x21d2; <tt>DoorFlow::ChannelsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Channels API for door control operations</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::ChannelsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>channels API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+162
+163
+164</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 162</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_channels_api'>channels_api</span>
+  <span class='ivar'>@channels_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>ChannelsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="credential_types-instance_method">
+  
+    #<strong>credential_types</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/CredentialTypesProxy.html" title="DoorFlow::Client::CredentialTypesProxy (class)">DoorFlow::Client::CredentialTypesProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Credential Types resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/CredentialTypesProxy.html" title="DoorFlow::Client::CredentialTypesProxy (class)">DoorFlow::Client::CredentialTypesProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>credential types resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+80
+81
+82</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 80</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_credential_types'>credential_types</span>
+  <span class='ivar'>@credential_types</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/CredentialTypesProxy.html" title="DoorFlow::Client::CredentialTypesProxy (class)">CredentialTypesProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="credential_types_api-instance_method">
+  
+    #<strong>credential_types_api</strong>  &#x21d2; <tt>DoorFlow::CredentialTypesApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Credential Types API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::CredentialTypesApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>credential types API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+168
+169
+170</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 168</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_credential_types_api'>credential_types_api</span>
+  <span class='ivar'>@credential_types_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>CredentialTypesApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="credentials-instance_method">
+  
+    #<strong>credentials</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/CredentialsProxy.html" title="DoorFlow::Client::CredentialsProxy (class)">DoorFlow::Client::CredentialsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Credentials resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/CredentialsProxy.html" title="DoorFlow::Client::CredentialsProxy (class)">DoorFlow::Client::CredentialsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>credentials resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+74
+75
+76</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 74</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_credentials'>credentials</span>
+  <span class='ivar'>@credentials</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/CredentialsProxy.html" title="DoorFlow::Client::CredentialsProxy (class)">CredentialsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="credentials_api-instance_method">
+  
+    #<strong>credentials_api</strong>  &#x21d2; <tt>DoorFlow::CredentialsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Credentials API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::CredentialsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>credentials API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+174
+175
+176</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 174</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_credentials_api'>credentials_api</span>
+  <span class='ivar'>@credentials_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>CredentialsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="events-instance_method">
+  
+    #<strong>events</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/EventsProxy.html" title="DoorFlow::Client::EventsProxy (class)">DoorFlow::Client::EventsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Events resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/EventsProxy.html" title="DoorFlow::Client::EventsProxy (class)">DoorFlow::Client::EventsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>events resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+104
+105
+106</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 104</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_events'>events</span>
+  <span class='ivar'>@events</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/EventsProxy.html" title="DoorFlow::Client::EventsProxy (class)">EventsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="events_api-instance_method">
+  
+    #<strong>events_api</strong>  &#x21d2; <tt>DoorFlow::EventsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Events API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::EventsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>events API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+180
+181
+182</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 180</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_events_api'>events_api</span>
+  <span class='ivar'>@events_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>EventsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="group_reservations-instance_method">
+  
+    #<strong>group_reservations</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/GroupReservationsProxy.html" title="DoorFlow::Client::GroupReservationsProxy (class)">DoorFlow::Client::GroupReservationsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Group Reservations resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/GroupReservationsProxy.html" title="DoorFlow::Client::GroupReservationsProxy (class)">DoorFlow::Client::GroupReservationsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>group reservations resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+116
+117
+118</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 116</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_group_reservations'>group_reservations</span>
+  <span class='ivar'>@group_reservations</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/GroupReservationsProxy.html" title="DoorFlow::Client::GroupReservationsProxy (class)">GroupReservationsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="group_reservations_api-instance_method">
+  
+    #<strong>group_reservations_api</strong>  &#x21d2; <tt>DoorFlow::GroupReservationsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Group Reservations API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::GroupReservationsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>group reservations API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+186
+187
+188</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 186</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_group_reservations_api'>group_reservations_api</span>
+  <span class='ivar'>@group_reservations_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>GroupReservationsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="groups-instance_method">
+  
+    #<strong>groups</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/GroupsProxy.html" title="DoorFlow::Client::GroupsProxy (class)">DoorFlow::Client::GroupsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Groups resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/GroupsProxy.html" title="DoorFlow::Client::GroupsProxy (class)">DoorFlow::Client::GroupsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>groups resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+68
+69
+70</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 68</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_groups'>groups</span>
+  <span class='ivar'>@groups</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/GroupsProxy.html" title="DoorFlow::Client::GroupsProxy (class)">GroupsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="groups_api-instance_method">
+  
+    #<strong>groups_api</strong>  &#x21d2; <tt>DoorFlow::GroupsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Groups API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::GroupsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>groups API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+192
+193
+194</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 192</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_groups_api'>groups_api</span>
+  <span class='ivar'>@groups_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>GroupsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="member_sessions-instance_method">
+  
+    #<strong>member_sessions</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/MemberSessionsProxy.html" title="DoorFlow::Client::MemberSessionsProxy (class)">DoorFlow::Client::MemberSessionsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access member widget sessions</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/MemberSessionsProxy.html" title="DoorFlow::Client::MemberSessionsProxy (class)">DoorFlow::Client::MemberSessionsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>member sessions resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+140
+141
+142</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 140</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_member_sessions'>member_sessions</span>
+  <span class='ivar'>@member_sessions</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/MemberSessionsProxy.html" title="DoorFlow::Client::MemberSessionsProxy (class)">MemberSessionsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="notification_rules-instance_method">
+  
+    #<strong>notification_rules</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/NotificationRulesProxy.html" title="DoorFlow::Client::NotificationRulesProxy (class)">DoorFlow::Client::NotificationRulesProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Notification Rules resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/NotificationRulesProxy.html" title="DoorFlow::Client::NotificationRulesProxy (class)">DoorFlow::Client::NotificationRulesProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>notification rules resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+122
+123
+124</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 122</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_notification_rules'>notification_rules</span>
+  <span class='ivar'>@notification_rules</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/NotificationRulesProxy.html" title="DoorFlow::Client::NotificationRulesProxy (class)">NotificationRulesProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="notification_rules_api-instance_method">
+  
+    #<strong>notification_rules_api</strong>  &#x21d2; <tt>DoorFlow::NotificationRulesApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Notification Rules API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::NotificationRulesApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>notification rules API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+198
+199
+200</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 198</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_notification_rules_api'>notification_rules_api</span>
+  <span class='ivar'>@notification_rules_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>NotificationRulesApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="oauth_api-instance_method">
+  
+    #<strong>oauth_api</strong>  &#x21d2; <tt>DoorFlow::OauthApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the OAuth API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::OauthApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>OAuth API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+204
+205
+206</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 204</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_oauth_api'>oauth_api</span>
+  <span class='ivar'>@oauth_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>OauthApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="people-instance_method">
+  
+    #<strong>people</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/PeopleProxy.html" title="DoorFlow::Client::PeopleProxy (class)">DoorFlow::Client::PeopleProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the People resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/PeopleProxy.html" title="DoorFlow::Client::PeopleProxy (class)">DoorFlow::Client::PeopleProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>people resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+62
+63
+64</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 62</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_people'>people</span>
+  <span class='ivar'>@people</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/PeopleProxy.html" title="DoorFlow::Client::PeopleProxy (class)">PeopleProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="people_api-instance_method">
+  
+    #<strong>people_api</strong>  &#x21d2; <tt>DoorFlow::PeopleApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the People API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::PeopleApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>people API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+210
+211
+212</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 210</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_people_api'>people_api</span>
+  <span class='ivar'>@people_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>PeopleApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="reservations-instance_method">
+  
+    #<strong>reservations</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/ReservationsProxy.html" title="DoorFlow::Client::ReservationsProxy (class)">DoorFlow::Client::ReservationsProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Reservations resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/ReservationsProxy.html" title="DoorFlow::Client::ReservationsProxy (class)">DoorFlow::Client::ReservationsProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>reservations resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+110
+111
+112</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 110</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_reservations'>reservations</span>
+  <span class='ivar'>@reservations</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/ReservationsProxy.html" title="DoorFlow::Client::ReservationsProxy (class)">ReservationsProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="reservations_api-instance_method">
+  
+    #<strong>reservations_api</strong>  &#x21d2; <tt>DoorFlow::ReservationsApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Reservations API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::ReservationsApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>reservations API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+216
+217
+218</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 216</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_reservations_api'>reservations_api</span>
+  <span class='ivar'>@reservations_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>ReservationsApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="roles-instance_method">
+  
+    #<strong>roles</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/RolesProxy.html" title="DoorFlow::Client::RolesProxy (class)">DoorFlow::Client::RolesProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Roles resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/RolesProxy.html" title="DoorFlow::Client::RolesProxy (class)">DoorFlow::Client::RolesProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>roles resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+98
+99
+100</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 98</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_roles'>roles</span>
+  <span class='ivar'>@roles</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/RolesProxy.html" title="DoorFlow::Client::RolesProxy (class)">RolesProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="roles_api-instance_method">
+  
+    #<strong>roles_api</strong>  &#x21d2; <tt>DoorFlow::RolesApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Roles API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::RolesApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>roles API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+222
+223
+224</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 222</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_roles_api'>roles_api</span>
+  <span class='ivar'>@roles_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>RolesApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="sites-instance_method">
+  
+    #<strong>sites</strong>  &#x21d2; <tt><span class='object_link'><a href="Client/SitesProxy.html" title="DoorFlow::Client::SitesProxy (class)">DoorFlow::Client::SitesProxy</a></span></tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Sites resource</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt><span class='object_link'><a href="Client/SitesProxy.html" title="DoorFlow::Client::SitesProxy (class)">DoorFlow::Client::SitesProxy</a></span></tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>sites resource proxy</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+92
+93
+94</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 92</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_sites'>sites</span>
+  <span class='ivar'>@sites</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="Client/SitesProxy.html" title="DoorFlow::Client::SitesProxy (class)">SitesProxy</a></span></span><span class='period'>.</span><span class='id identifier rubyid_new'><span class='object_link'><a href="Client/ResourceProxy.html#initialize-instance_method" title="DoorFlow::Client::ResourceProxy#initialize (method)">new</a></span></span><span class='lparen'>(</span><span class='kw'>self</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="sites_api-instance_method">
+  
+    #<strong>sites_api</strong>  &#x21d2; <tt>DoorFlow::SitesApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Sites API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::SitesApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>sites API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+228
+229
+230</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 228</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_sites_api'>sites_api</span>
+  <span class='ivar'>@sites_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>SitesApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+      <div class="method_details ">
+  <h3 class="signature " id="sync_api-instance_method">
+  
+    #<strong>sync_api</strong>  &#x21d2; <tt>DoorFlow::SyncApi</tt> 
+  
+
+  
+
+  
+</h3><div class="docstring">
+  <div class="discussion">
+    <p>Access the Sync API</p>
+
+  </div>
+</div>
+<div class="tags">
+  
+<p class="tag_title">Returns:</p>
+<ul class="return">
+  
+    <li>
+      
+      
+        <span class='type'>(<tt>DoorFlow::SyncApi</tt>)</span>
+      
+      
+      
+        &mdash;
+        <div class='inline'><p>sync API instance</p></div>
+      
+    </li>
+  
+</ul>
+
+</div><table class="source_code">
+  <tr>
+    <td>
+      <pre class="lines">
+
+
+234
+235
+236</pre>
+    </td>
+    <td>
+      <pre class="code"><span class="info file"># File 'lib/doorflow/client.rb', line 234</span>
+
+<span class='kw'>def</span> <span class='id identifier rubyid_sync_api'>sync_api</span>
+  <span class='ivar'>@sync_api</span> <span class='op'>||=</span> <span class='const'><span class='object_link'><a href="../DoorFlow.html" title="DoorFlow (module)">DoorFlow</a></span></span><span class='op'>::</span><span class='const'>SyncApi</span><span class='period'>.</span><span class='id identifier rubyid_new'>new</span><span class='lparen'>(</span><span class='id identifier rubyid_api_client'>api_client</span><span class='rparen'>)</span>
+<span class='kw'>end</span></pre>
+    </td>
+  </tr>
+</table>
+</div>
+    
+  </div>
+
+</div>
+
+      <div id="footer">
+  Generated on Wed Nov  4 09:51:19 2026 by
+  <a href="https://yardoc.org" title="Yay! A Ruby Documentation Tool" target="_parent">yard</a>
+  0.9.45 (ruby-3.4.12).
+</div>
+
+    </div>
+  </body>
+</html>
